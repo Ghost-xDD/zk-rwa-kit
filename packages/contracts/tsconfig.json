@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*", "scripts/**/*", "test/**/*", "typechain-types/**/*"],
+  "exclude": ["node_modules", "dist", "artifacts", "cache"]
+}

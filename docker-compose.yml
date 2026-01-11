@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # Rust TLSNotary Prover Server
+  prover-server:
+    build: ./apps/prover-server
+    ports:
+      - "9816"
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    container_name: zk-rwa-prover
+    depends_on:
+      - mock-bank
+    networks:
+      - zk-rwa-network
+
+  # Mock Bank (target for TLS proofs)
+  mock-bank:
+    build: ./apps/mock-bank
+    ports:
+      - "3002:3002"
+    environment:
+      - MOCK_BANK_PORT=3002
+      - NODE_ENV=production
+    restart: unless-stopped
+    container_name: zk-rwa-mockbank
+    networks:
+      - zk-rwa-network
+
+  # Relayer (proof verification + chain writes)
+  relayer:
+    build: ./packages/relayer
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      - RELAYER_PORT=3001
+    restart: unless-stopped
+    container_name: zk-rwa-relayer
+    networks:
+      - zk-rwa-network
+
+  # Webapp (React + WASM verifier)
+  webapp:
+    build:
+      context: ./apps/webapp
+      args:
+        PROVER_PROXY_URL: wss://localhost/prove
+        RELAYER_URL: http://localhost:3001
+    ports:
+      - "8080"
+    restart: unless-stopped
+    container_name: zk-rwa-webapp
+    depends_on:
+      - prover-server
+      - relayer
+    networks:
+      - zk-rwa-network
+
+  # Caddy Reverse Proxy (HTTPS + COOP/COEP headers)
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - webapp
+      - prover-server
+      - relayer
+    restart: unless-stopped
+    container_name: zk-rwa-caddy
+    networks:
+      - zk-rwa-network
+
+networks:
+  zk-rwa-network:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

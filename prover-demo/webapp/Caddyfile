@@ -1,0 +1,24 @@
+:80 {
+	root * /usr/share/caddy
+
+	# Enable precompressed file serving
+	file_server {
+		precompressed br gzip
+	}
+
+	# SPA routing - try files, fallback to index.html
+	try_files {path} {path}/ /index.html
+
+	# Cache static assets
+	@static path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg *.wasm
+	header @static Cache-Control "public, max-age=3600"
+
+	# Required headers for SharedArrayBuffer and security
+	header /* {
+		Cross-Origin-Embedder-Policy "require-corp"
+		Cross-Origin-Opener-Policy "same-origin"
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		X-XSS-Protection "1; mode=block"
+	}
+}

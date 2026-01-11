@@ -1,0 +1,42 @@
+{
+  "name": "zk-rwa-kit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Privacy-preserving compliance-gated RWA toolkit for Mantle",
+  "keywords": ["rwa", "zk", "tlsnotary", "mantle", "compliance", "erc3643"],
+  "license": "MIT",
+  "author": "Zk-RWA-Kit Contributors",
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:contracts": "pnpm --filter @zk-rwa-kit/contracts build",
+    "build:sdk": "pnpm --filter @zk-rwa-kit/client-sdk build",
+    "build:relayer": "pnpm --filter @zk-rwa-kit/relayer build",
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "deploy": "pnpm --filter @zk-rwa-kit/contracts deploy:mantle-sepolia",
+    "dev:contracts": "pnpm --filter @zk-rwa-kit/contracts node",
+    "dev:mock-bank": "pnpm --filter @zk-rwa-kit/mock-bank dev",
+    "dev:relayer": "pnpm --filter @zk-rwa-kit/relayer dev",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "generate-certs": "bash scripts/generate-certs.sh",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "pnpm -r test",
+    "test:contracts": "pnpm --filter @zk-rwa-kit/contracts test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.12.0"
+}

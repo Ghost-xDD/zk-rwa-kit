@@ -1,0 +1,40 @@
+# Zk-RWA-Kit Caddy Configuration
+# Handles HTTPS, COOP/COEP headers, and reverse proxying
+
+localhost {
+    tls /certs/fullchain.pem /certs/privkey.pem
+
+    # WebSocket proxy to prover server
+    handle /prove {
+        reverse_proxy prover-server:9816
+    }
+
+    # API proxy to relayer
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy relayer:3001
+    }
+
+    # Mock bank proxy (for development)
+    handle /bank/* {
+        uri strip_prefix /bank
+        reverse_proxy mock-bank:3002
+    }
+
+    # Everything else to webapp
+    reverse_proxy webapp:8080
+
+    # Required headers for SharedArrayBuffer (WASM threading)
+    header /* {
+        Cross-Origin-Embedder-Policy "require-corp"
+        Cross-Origin-Opener-Policy "same-origin"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+    }
+}
+
+# Redirect HTTP to HTTPS
+http://localhost {
+    redir https://localhost{uri}
+}

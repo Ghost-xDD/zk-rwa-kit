@@ -1,0 +1,41 @@
+{
+  "name": "@zk-rwa-kit/client-sdk",
+  "version": "0.1.0",
+  "description": "Client SDK for Zk-RWA-Kit: TLS proof generation and submission",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "comlink": "^4.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "tlsn-wasm": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "tlsn-wasm": {
+      "optional": true
+    }
+  }
+}

@@ -1,0 +1,12 @@
+devconnect-local.tlsnotary.org {
+	tls /certs/fullchain.pem /certs/privkey.pem
+	# tls internal
+
+	# WebSocket proxy to prover backend
+	handle /prove {
+		reverse_proxy prover-server:9816
+	}
+
+	# Everything else proxied to webapp
+	reverse_proxy verifier-webapp:80
+}
