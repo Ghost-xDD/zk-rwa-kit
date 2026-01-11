@@ -166,14 +166,30 @@ function App(): ReactElement {
 
       // Parse received data to check eligibility
       const recvString = bytesToUtf8(recv);
-      const eligibleMatch = recvString.match(/"eligible"\s*:\s*(true|false)/i);
-      const isEligible = eligibleMatch ? eligibleMatch[1].toLowerCase() === 'true' : false;
+      console.log('📦 Received data (first 300 chars):', recvString.substring(0, 300));
+
+      // SwissBank format reveals: "organization", "bank", "USD", "EUR", "CHF"
+      // Having any balance data means the user is eligible
+      const hasOrganization = recvString.includes('"organization"');
+      const hasBank = recvString.includes('"bank"');
+      const hasUSD = recvString.includes('"USD"');
+      const hasEUR = recvString.includes('"EUR"');
+      const hasCHF = recvString.includes('"CHF"');
+      
+      // User is eligible if they have verified bank account data
+      const isEligible = hasOrganization || hasBank || hasUSD || hasEUR || hasCHF;
+
+      console.log(`🔍 Eligibility: org=${hasOrganization}, bank=${hasBank}, USD=${hasUSD}, EUR=${hasEUR}, CHF=${hasCHF}`);
+      console.log(`✅ Eligible: ${isEligible}`);
 
       if (!isEligible) {
-        setError('Account is not eligible for RWA tokens');
+        console.log('❌ No verified bank data found');
+        setError('Could not verify bank account data');
         setProcessing(false);
         return;
       }
+      
+      console.log('🎉 Bank account verified! User is eligible for RWA tokens.');
 
       setVerifiedData({
         serverName,

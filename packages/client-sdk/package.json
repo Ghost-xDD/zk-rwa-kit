@@ -31,7 +31,7 @@
     "typescript": "^5.3.0"
   },
   "peerDependencies": {
-    "tlsn-wasm": ">=0.1.0"
+    "tlsn-wasm": ">=0.1.0-alpha.1"
   },
   "peerDependenciesMeta": {
     "tlsn-wasm": {

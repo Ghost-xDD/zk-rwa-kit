@@ -9,6 +9,11 @@ out/
 .next/
 coverage/
 
+# Rust
+target/
+Cargo.lock
+*.rs.bk
+
 # Hardhat
 artifacts/
 cache/

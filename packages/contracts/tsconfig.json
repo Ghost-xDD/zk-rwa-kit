@@ -1,9 +1,22 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": ".",
+    "resolveJsonModule": true,
+    "declaration": true
   },
-  "include": ["src/**/*", "scripts/**/*", "test/**/*", "typechain-types/**/*"],
+  "include": [
+    "./scripts",
+    "./test",
+    "./typechain-types",
+    "./hardhat.config.ts"
+  ],
   "exclude": ["node_modules", "dist", "artifacts", "cache"]
 }

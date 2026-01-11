@@ -129,12 +129,13 @@ fn redact_and_reveal_received_data(recv_transcript: &[u8]) -> RangeSet<usize> {
         .expect("Failed to get body content offset");
     json.offset(body_offset);
 
-    // Extract required JSON fields for RWA eligibility verification
-    // These fields from our mock-bank will be revealed to the verifier
+    // Extract required JSON fields from SwissBank format
     let fields = [
-        ("eligible", "\"eligible\": "),
-        ("accredited", "\"accredited\": "),
-        ("kycVerified", "\"kycVerified\": "),
+        ("organization", "\"organization\": \""),
+        ("bank", "\"bank\": \""),
+        ("accounts.USD", "\"USD\": \""),
+        ("accounts.EUR", "\"EUR\": \""),
+        ("accounts.CHF", "\"CHF\": \""),
     ];
 
     // Create ranges for each field

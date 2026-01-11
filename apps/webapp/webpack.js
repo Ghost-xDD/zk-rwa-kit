@@ -121,11 +121,12 @@ var options = {
     alias: alias,
     extensions: fileExtensions
       .map((extension) => '.' + extension)
-      .concat(['.js', '.jsx', '.ts', '.tsx', '.css', 'svg']),
+      .concat(['.js', '.jsx', '.ts', '.tsx', '.css', '.svg']),
     fallback: {
       crypto: require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
       vm: require.resolve('vm-browserify'),
+      process: require.resolve('process/browser'),
     },
   },
   plugins: [

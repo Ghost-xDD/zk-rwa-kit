@@ -1,0 +1,27 @@
+# Local development Caddyfile
+# Run with: caddy run --config Caddyfile.local
+
+{
+    # Use self-signed certs for localhost
+    local_certs
+}
+
+# Mock Bank HTTPS endpoint (prover connects here)
+https://localhost:3443 {
+    reverse_proxy localhost:3002
+}
+
+# Webapp with COOP/COEP headers
+https://localhost:8443 {
+    reverse_proxy localhost:8080
+    
+    header /* {
+        Cross-Origin-Embedder-Policy "require-corp"
+        Cross-Origin-Opener-Policy "same-origin"
+    }
+}
+
+# WebSocket proxy to prover server
+https://localhost:9443 {
+    reverse_proxy localhost:9816
+}

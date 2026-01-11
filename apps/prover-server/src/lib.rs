@@ -4,6 +4,7 @@ use axum::{
     routing::get,
     Router,
 };
+use axum_websocket::{WebSocket, WebSocketUpgrade};
 use eyre::eyre;
 use http::Uri;
 use hyper::{body::Incoming, server::conn::http1};
@@ -19,43 +20,39 @@ use tower_service::Service;
 use tracing::{debug, error, info};
 use ws_stream_tungstenite::WsStream;
 
-pub mod axum_websocket;
+mod axum_websocket;
 pub mod config;
 pub mod prover;
 pub mod verifier;
-
-use axum_websocket::{WebSocket, WebSocketUpgrade};
 use prover::prover;
 use verifier::verifier;
 
-/// Global data shared with axum handlers
+/// Global data that needs to be shared with the axum handlers
 #[derive(Clone, Debug)]
 struct ServerGlobals {
     pub server_uri: Uri,
     pub session_timeout: Duration,
 }
 
-/// Socket type enum for prover vs verifier
+/// Enum to differentiate between prover and verifier socket handling
 #[derive(Clone, Debug)]
 enum SocketType {
     Prover,
     Verifier,
 }
 
-/// Run the WebSocket server
 pub async fn run_ws_server(config: &config::Config) -> Result<(), eyre::ErrReport> {
     let ws_server_address = SocketAddr::new(
         IpAddr::V4(config.ws_host.parse().map_err(|err| {
-            eyre!("Failed to parse websocket host address: {err}")
+            eyre!("Failed to parse websocket host address from server config: {err}")
         })?),
         config.ws_port,
     );
-    
     let listener = TcpListener::bind(ws_server_address)
         .await
-        .map_err(|err| eyre!("Failed to bind server address: {err}"))?;
+        .map_err(|err| eyre!("Failed to bind server address to tcp listener: {err}"))?;
 
-    info!("WebSocket server listening on {}", ws_server_address);
+    info!("Listening for TCP traffic at {}", ws_server_address);
 
     let protocol = Arc::new(http1::Builder::new());
     let router = Router::new()
@@ -67,7 +64,6 @@ pub async fn run_ws_server(config: &config::Config) -> Result<(), eyre::ErrRepor
             "/verify",
             get(|ws, state| ws_handler(ws, state, SocketType::Verifier)),
         )
-        .route("/health", get(health_handler))
         .with_state(ServerGlobals {
             server_uri: config.server_uri.clone(),
             session_timeout: Duration::from_secs(config.session_timeout_secs),
@@ -75,30 +71,31 @@ pub async fn run_ws_server(config: &config::Config) -> Result<(), eyre::ErrRepor
 
     loop {
         let stream = match listener.accept().await {
-            Ok((stream, addr)) => {
-                debug!("Accepted connection from {}", addr);
-                stream
-            }
+            Ok((stream, _)) => stream,
             Err(err) => {
                 error!("Failed to accept TCP connection: {err}");
                 continue;
             }
         };
-        
+        debug!("Received TCP connection");
         stream.set_nodelay(true).unwrap();
 
         let tower_service = router.clone();
         let protocol = protocol.clone();
 
         tokio::spawn(async move {
+            info!("Accepted TCP connection");
+            // Reference: https://github.com/tokio-rs/axum/blob/5201798d4e4d4759c208ef83e30ce85820c07baa/examples/low-level-rustls/src/main.rs#L67-L80
             let io = TokioIo::new(stream);
 
             let hyper_service = hyper::service::service_fn(move |request: Request<Incoming>| {
                 tower_service.clone().call(request)
             });
-            
+            // Serve different requests using the same hyper protocol and axum router
             if let Err(err) = protocol
                 .serve_connection(io, hyper_service)
+                // use with_upgrades to upgrade connection to websocket for websocket clients
+                // and to extract tcp connection for tcp clients
                 .with_upgrades()
                 .await
             {
@@ -108,16 +105,6 @@ pub async fn run_ws_server(config: &config::Config) -> Result<(), eyre::ErrRepor
     }
 }
 
-/// Health check handler
-async fn health_handler() -> impl IntoResponse {
-    axum::Json(serde_json::json!({
-        "status": "ok",
-        "service": "zk-rwa-prover",
-        "timestamp": chrono::Utc::now().to_rfc3339()
-    }))
-}
-
-/// WebSocket upgrade handler
 async fn ws_handler(
     ws: WebSocketUpgrade,
     State(globals): State<ServerGlobals>,
@@ -127,11 +114,10 @@ async fn ws_handler(
         SocketType::Prover => "proving",
         SocketType::Verifier => "verification",
     };
-    info!("Received WebSocket request for {}", operation);
+    info!("Received websocket request for {}", operation);
     ws.on_upgrade(move |socket| handle_socket(socket, globals, socket_type))
 }
 
-/// Handle WebSocket connection
 async fn handle_socket(socket: WebSocket, globals: ServerGlobals, socket_type: SocketType) {
     let stream = WsStream::new(socket.into_inner());
     let session_timeout = globals.session_timeout;
@@ -157,22 +143,21 @@ async fn handle_socket(socket: WebSocket, globals: ServerGlobals, socket_type: S
     match socket_type {
         SocketType::Prover => {
             let result = timeout(session_timeout, prover(stream, &globals.server_uri)).await;
-            handle_operation_result(result, "Proving", |_| {
-                info!("Proving completed successfully");
-            });
+            handle_operation_result(result, "Proving", |_| {});
         }
         SocketType::Verifier => {
             let domain = globals
                 .server_uri
                 .authority()
-                .map(|a| a.host().to_string())
-                .unwrap_or_else(|| "unknown".to_string());
+                .ok_or_else(|| error!("Failed to extract domain from server URI"))
+                .unwrap()
+                .host();
 
-            let result = timeout(session_timeout, verifier(stream, &domain)).await;
+            let result = timeout(session_timeout, verifier(stream, domain)).await;
             handle_operation_result(result, "Verification", |(sent, received)| {
-                info!("Verification completed for {}", domain);
-                info!("Sent data length: {} bytes", sent.len());
-                info!("Received data length: {} bytes", received.len());
+                info!("Successfully verified {}", domain);
+                info!("Verified sent data:\n{}", sent);
+                info!("Verified received data:\n{}", received);
             });
         }
     }

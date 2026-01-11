@@ -54,16 +54,15 @@ pub async fn verifier<T: AsyncWrite + AsyncRead + Send + Unpin + 'static>(
         .find(server_domain)
         .ok_or_else(|| eyre!("Verification failed: Expected host {}", server_domain))?;
 
-    // Check received data: verify it contains eligibility information
+    // Check received data: check json and version number.
     debug!("Starting received data verification...");
     let received = transcript.received_unsafe().to_vec();
     let response = String::from_utf8(received.clone()).expect("Verifier expected received data");
 
     debug!("Received data: {:?}", response);
-    // Check that the response contains eligibility data from our mock-bank
     response
-        .find("eligible")
-        .ok_or_else(|| eyre!("Verification failed: missing eligibility data in response"))?;
+        .find("Ethereum Foundation")
+        .ok_or_else(|| eyre!("Verification failed: missing data in received data"))?;
 
     // Check Session info: server name.
     let ServerName::Dns(dns_name) = server_name;

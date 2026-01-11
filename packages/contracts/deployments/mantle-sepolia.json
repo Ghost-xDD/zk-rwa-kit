@@ -1,0 +1,11 @@
+{
+  "identityRegistry": "0x194E19AF9bfe69aDA8de9df3eAfAebbe60d0bC74",
+  "zkOracle": "0xC6816eBE0a22B1C2de557bEF30852fa8968D2296",
+  "complianceModule": "0x4E4a57AaE1c5Bbb81a428376a997CB6011844166",
+  "rwaToken": "0x312321b889F249B91DD4137EE795F92b753b7e2F",
+  "deployer": "0x311e26702ABa231c321C633d1ff6ecB4445f2308",
+  "relayer": "0x311e26702ABa231c321C633d1ff6ecB4445f2308",
+  "chainId": "5003",
+  "network": "mantleSepolia",
+  "deployedAt": "2026-01-11T23:22:02.729Z"
+}

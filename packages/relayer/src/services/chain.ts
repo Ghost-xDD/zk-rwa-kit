@@ -1,11 +1,16 @@
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
+import dotenv from 'dotenv';
+
+// Load environment variables (must be done before accessing process.env)
+dotenv.config({ path: '../../.env' });
 
 // Initialize provider and wallet
-const RPC_URL = process.env.MANTLE_SEPOLIA_RPC_URL || "https://rpc.sepolia.mantle.xyz";
+const RPC_URL =
+  process.env.MANTLE_SEPOLIA_RPC_URL || 'https://rpc.sepolia.mantle.xyz';
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 if (!PRIVATE_KEY) {
-  console.warn("⚠️  PRIVATE_KEY not set - chain operations will fail");
+  console.warn('⚠️  PRIVATE_KEY not set - chain operations will fail');
 }
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -13,9 +18,9 @@ const wallet = PRIVATE_KEY ? new ethers.Wallet(PRIVATE_KEY, provider) : null;
 
 // ZkOracle ABI (minimal - just what we need)
 const ZK_ORACLE_ABI = [
-  "function submitClaim(address subject, bytes32 claimType, bytes32 claimValue, uint256 expiry, bytes calldata proof) external",
-  "function getClaim(address subject, bytes32 claimType) external view returns (bytes32 value, uint256 expiry)",
-  "event ClaimSubmitted(address indexed subject, bytes32 indexed claimType, bytes32 claimValue, uint256 expiry)",
+  'function submitClaim(address subject, bytes32 claimType, bytes32 claimValue, uint256 expiry, bytes calldata proof) external',
+  'function getClaim(address subject, bytes32 claimType) external view returns (bytes32 value, uint256 expiry)',
+  'event ClaimSubmitted(address indexed subject, bytes32 indexed claimType, bytes32 claimValue, uint256 expiry)',
 ];
 
 /**
@@ -27,12 +32,14 @@ export async function submitClaimOnChain(
   claimValue: string
 ): Promise<{ txHash: string; expiry: number }> {
   if (!wallet) {
-    throw new Error("Wallet not configured - set PRIVATE_KEY environment variable");
+    throw new Error(
+      'Wallet not configured - set PRIVATE_KEY environment variable'
+    );
   }
 
   const zkOracleAddress = process.env.ZK_ORACLE_ADDRESS;
   if (!zkOracleAddress) {
-    throw new Error("ZK_ORACLE_ADDRESS not configured");
+    throw new Error('ZK_ORACLE_ADDRESS not configured');
   }
 
   const zkOracle = new ethers.Contract(zkOracleAddress, ZK_ORACLE_ABI, wallet);
@@ -49,7 +56,7 @@ export async function submitClaimOnChain(
   const expiry = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
 
   // Create proof placeholder (the relayer has verified the proof off-chain)
-  const proofPlaceholder = ethers.toUtf8Bytes("verified-by-relayer");
+  const proofPlaceholder = ethers.toUtf8Bytes('verified-by-relayer');
 
   console.log(`Submitting claim to ZkOracle at ${zkOracleAddress}`);
   console.log(`  Subject: ${subject}`);
@@ -80,7 +87,7 @@ export async function submitClaimOnChain(
  */
 export async function getTransactionStatus(txHash: string): Promise<{
   txHash: string;
-  status: "pending" | "confirmed" | "failed";
+  status: 'pending' | 'confirmed' | 'failed';
   blockNumber?: number;
   confirmations?: number;
 }> {
@@ -89,14 +96,14 @@ export async function getTransactionStatus(txHash: string): Promise<{
   if (!receipt) {
     return {
       txHash,
-      status: "pending",
+      status: 'pending',
     };
   }
 
   if (receipt.status === 0) {
     return {
       txHash,
-      status: "failed",
+      status: 'failed',
       blockNumber: receipt.blockNumber,
     };
   }
@@ -106,7 +113,7 @@ export async function getTransactionStatus(txHash: string): Promise<{
 
   return {
     txHash,
-    status: "confirmed",
+    status: 'confirmed',
     blockNumber: receipt.blockNumber,
     confirmations,
   };
@@ -117,14 +124,18 @@ export async function getTransactionStatus(txHash: string): Promise<{
  */
 export async function isAddressVerified(
   address: string,
-  claimType: string = "ELIGIBLE"
+  claimType: string = 'ELIGIBLE'
 ): Promise<boolean> {
   const zkOracleAddress = process.env.ZK_ORACLE_ADDRESS;
   if (!zkOracleAddress) {
-    throw new Error("ZK_ORACLE_ADDRESS not configured");
+    throw new Error('ZK_ORACLE_ADDRESS not configured');
   }
 
-  const zkOracle = new ethers.Contract(zkOracleAddress, ZK_ORACLE_ABI, provider);
+  const zkOracle = new ethers.Contract(
+    zkOracleAddress,
+    ZK_ORACLE_ABI,
+    provider
+  );
   const claimTypeBytes32 = ethers.keccak256(ethers.toUtf8Bytes(claimType));
 
   const [value, expiry] = await zkOracle.getClaim(address, claimTypeBytes32);
@@ -141,7 +152,7 @@ export async function getRelayerInfo(): Promise<{
   nonce: number;
 }> {
   if (!wallet) {
-    throw new Error("Wallet not configured");
+    throw new Error('Wallet not configured');
   }
 
   const [balance, nonce] = await Promise.all([
