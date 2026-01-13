@@ -8,6 +8,30 @@ Built for Mantle Global Hackathon 2025.
 [![TLSNotary](https://img.shields.io/badge/TLSNotary-v0.1.0--alpha.13-green)](https://tlsnotary.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Table of contents
+
+- [Overview](#overview)
+- [Problem statement](#problem-statement)
+- [Solution](#solution)
+- [Who this is for](#who-this-is-for)
+- [Components](#components)
+- [SDK Usage](#sdk-usage)
+  - [Install](#install)
+  - [Core API](#core-api)
+  - [Minimal usage](#minimal-usage)
+  - [Browser requirement](#browser-requirement)
+- [Architecture (end-to-end flow)](#architecture-end-to-end-flow)
+- [Repo layout](#repo-layout)
+- [Quick start (local)](#quick-start-local)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+  - [Run services](#run-services)
+  - [Run manually (without Docker)](#run-manually-without-docker)
+- [Demo flow (what to show)](#demo-flow-what-to-show)
+- [Scripts](#scripts)
+- [Security notes](#security-notes)
+- [License](#license)
+
 ## Overview
 
 Zk-RWA-Kit enables developers to build **privacy-preserving, compliance-gated Real World Asset (RWA)** workflows on Mantle. Users can prove their eligibility for RWA tokens using TLSNotary MPC-TLS proofs without exposing sensitive credentials.
@@ -69,13 +93,21 @@ pnpm add @zk-rwa-kit/client-sdk
 
 ### Core API
 
-- **`proveEligibility(options?)`** → generates a TLSNotary-backed `VerifiedTranscript`
-  - Key options: `proverUrl`, `timeout`, `demoMode`, `maxSentData`, `maxRecvData`
-- **`submitProof(walletAddress, transcript, options?)`** → sends the proof to the relayer which writes an on-chain SessionCredential
-  - Key options: `relayerUrl`, `claimType` (default `CLAIM_TYPES.ELIGIBLE`), `extractedValue`, `timeout`
-- **Status helpers**: `checkTransactionStatus(txHash)` and `waitForConfirmation(txHash)`
-- **Utilities**: `serializeTranscript`, `deserializeTranscript`, `transcriptToString`, `extractClaims`, `extractField`, `parseJsonFromTranscript`
-- **Constants**: `DEFAULT_PROVER_URL`, `DEFAULT_RELAYER_URL`, `MANTLE_SEPOLIA_CONFIG`, `CLAIM_TYPES`, `MAX_SENT_DATA`, `MAX_RECV_DATA`
+- **Generate proof**: `proveEligibility(options?) → ProveResult`
+  - **returns**: `{ success, transcript?: VerifiedTranscript, error? }`
+  - **common options**: `proverUrl`, `timeout`, `demoMode`, `maxSentData`, `maxRecvData`
+
+- **Submit proof**: `submitProof(walletAddress, transcript, options?) → SubmitResult`
+  - **does**: sends the transcript to the relayer, which verifies + writes an on-chain SessionCredential
+  - **common options**: `relayerUrl`, `claimType` (default `CLAIM_TYPES.ELIGIBLE`), `extractedValue`, `timeout`
+
+- **Track transaction**: `checkTransactionStatus(txHash)` / `waitForConfirmation(txHash)`
+
+- **Parse transcripts**: `transcriptToString`, `extractClaims`, `extractField`, `parseJsonFromTranscript`
+
+- **Serialize for transport**: `serializeTranscript`, `deserializeTranscript`
+
+- **Defaults / constants**: `DEFAULT_PROVER_URL`, `DEFAULT_RELAYER_URL`, `MANTLE_SEPOLIA_CONFIG`, `CLAIM_TYPES`, `MAX_SENT_DATA`, `MAX_RECV_DATA`
 
 ### Minimal usage
 
