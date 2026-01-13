@@ -8,15 +8,19 @@ Built for Mantle Global Hackathon 2025.
 [![TLSNotary](https://img.shields.io/badge/TLSNotary-v0.1.0--alpha.13-green)](https://tlsnotary.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Problem
+## Overview
 
-**Users want privacy:** access compliant RWA yield on Mantle without permanently linking their main wallet to a centralized KYC flow that doxxes their on-chain history.
+Zk-RWA-Kit enables developers to build **privacy-preserving, compliance-gated Real World Asset (RWA)** workflows on Mantle. Users can prove their eligibility for RWA tokens using TLSNotary MPC-TLS proofs without exposing sensitive credentials.
 
-**Developers want composability:** permissioned assets (ERC-3643-style allowlists / transfer restrictions) break standard DeFi building blocks because protocols and users aren’t recognized as eligible recipients.
+## Problem statement
 
-**Ecosystems need last-mile tooling:** Mantle has strong RWA + privacy momentum, but developers still lack a plug-and-play way to turn “private eligibility proofs” into “composable compliance” that DeFi apps can consume safely.
+- **Users want privacy:** access compliant RWA yield on Mantle without permanently linking their main wallet to a centralized KYC flow that doxxes their on-chain history.
 
-## What this is
+- **Developers want composability:** permissioned assets (ERC-3643-style allowlists / transfer restrictions) break standard DeFi building blocks because protocols and users aren’t recognized as eligible recipients.
+
+- **Ecosystems need last-mile tooling:** Mantle has strong RWA + privacy momentum, but developers still lack a plug-and-play way to turn “private eligibility proofs” into “composable compliance” that DeFi apps can consume safely.
+
+## Solution
 
 Zk-RWA-Kit is an **infrastructure + tooling SDK + reference dApps** that enable **just-in-time, privacy-preserving compliance** for RWA-like workflows on Mantle.
 
@@ -27,8 +31,6 @@ It does **not** bypass compliance. Instead, it creates a **compliant perimeter**
 - **RWA / DeFi app developers** who need a repeatable way to gate actions (mint / transfer / deposit) with privacy-preserving eligibility proofs.
 - **Protocol builders** (vaults, lending markets, AMMs) who want “composable compliance” primitives instead of bespoke allowlists and fragile edge-case logic.
 - **Hackathon / demo teams** that want an end-to-end reference flow: prove eligibility → issue a SessionCredential → interact with a compliant DeFi integration on Mantle.
-
-Not for: production mainnet deployments as-is — this repo is intended as a hackathon-grade reference implementation and starting point.
 
 ## Components
 
