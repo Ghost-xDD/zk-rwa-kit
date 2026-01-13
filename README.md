@@ -2,205 +2,175 @@
 
 > **Privacy-preserving, compliance-gated RWA toolkit for Mantle**
 
-Built for Mantle Global Hackathon 2025
+Built for Mantle Global Hackathon 2025.
 
 [![Mantle Sepolia](https://img.shields.io/badge/Mantle-Sepolia-blue)](https://sepolia.mantlescan.xyz)
 [![TLSNotary](https://img.shields.io/badge/TLSNotary-v0.1.0--alpha.13-green)](https://tlsnotary.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Overview
+## Problem
 
-Zk-RWA-Kit enables developers to build **privacy-preserving, compliance-gated Real World Asset (RWA)** workflows on Mantle. Users can prove their eligibility for RWA tokens using TLSNotary MPC-TLS proofs without exposing sensitive credentials.
+**Users want privacy:** access compliant RWA yield on Mantle without permanently linking their main wallet to a centralized KYC flow that doxxes their on-chain history.
 
-## Architecture
+**Developers want composability:** permissioned assets (ERC-3643-style allowlists / transfer restrictions) break standard DeFi building blocks because protocols and users aren’t recognized as eligible recipients.
+
+**Ecosystems need last-mile tooling:** Mantle has strong RWA + privacy momentum, but developers still lack a plug-and-play way to turn “private eligibility proofs” into “composable compliance” that DeFi apps can consume safely.
+
+## What this is
+
+Zk-RWA-Kit is an **infrastructure + tooling SDK + reference dApps** that enable **just-in-time, privacy-preserving compliance** for RWA-like workflows on Mantle.
+
+It does **not** bypass compliance. Instead, it creates a **compliant perimeter** where RWAs become DeFi-composable _among eligible users and integrations_, without a permanent public allowlist.
+
+## Who this is for
+
+- **RWA / DeFi app developers** who need a repeatable way to gate actions (mint / transfer / deposit) with privacy-preserving eligibility proofs.
+- **Protocol builders** (vaults, lending markets, AMMs) who want “composable compliance” primitives instead of bespoke allowlists and fragile edge-case logic.
+- **Hackathon / demo teams** that want an end-to-end reference flow: prove eligibility → issue a SessionCredential → interact with a compliant DeFi integration on Mantle.
+
+Not for: production mainnet deployments as-is — this repo is intended as a hackathon-grade reference implementation and starting point.
+
+## Components
+
+### A) Client-side Prover SDK (TypeScript/WASM)
+
+A browser library that uses **TLSNotary-style MPC-TLS proofs** to generate **selective-disclosure eligibility proofs** from an HTTPS session.
+
+- The user authenticates to a trusted eligibility source.
+- The SDK proves a condition is true (e.g. “eligible”), revealing only the minimum required fields.
+- Output is a proof payload suitable for verification and credential issuance.
+
+### B) Verification + Session Credentials (Relayer + contracts)
+
+The MVP verifies proofs **off-chain** (relayer) and writes an on-chain, time-bounded result:
+
+- A verified claim becomes an expiring **SessionCredential** (e.g. `ELIGIBLE`).
+- DeFi integrations check the credential, not a permanent KYC flag.
+
+Future upgrade path: swap relayer verification for on-chain verifiers once costs/circuits are ready.
+
+### C) Compliant Perimeter DeFi (example vault / example token workflow)
+
+Reference flows that enforce “only eligible users (and optionally eligible integrations) can interact”.
+
+This makes RWA-like workflows **DeFi-compatible within a compliant perimeter** instead of “free-trading”.
+
+## Architecture (end-to-end flow)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                           USER'S BROWSER                             │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐          │
-│  │   Webapp     │───▶│ WASM Verifier│───▶│ Submit Proof │          │
-│  │   (React)    │    │  (tlsn-wasm) │    │  to Relayer  │          │
-│  └──────────────┘    └──────┬───────┘    └──────┬───────┘          │
-└─────────────────────────────┼───────────────────┼──────────────────┘
-                              │ WebSocket         │ HTTP POST
-                              ▼                   ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                         DOCKER COMPOSE                               │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌───────────┐  │
-│  │   Prover    │─▶│  Mock Bank  │  │   Relayer   │  │   Caddy   │  │
-│  │   (Rust)    │  │  (Express)  │  │  (Express)  │  │  (Proxy)  │  │
-│  └─────────────┘  └─────────────┘  └──────┬──────┘  └───────────┘  │
-└───────────────────────────────────────────┼─────────────────────────┘
-                                            │ ethers.js
-                                            ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    MANTLE SEPOLIA (Chain ID: 5003)                   │
-│  ┌──────────┐    ┌─────────────────┐    ┌──────────────────┐        │
-│  │ ZkOracle │───▶│IdentityRegistry │◀───│ ComplianceModule │        │
-│  └──────────┘    └─────────────────┘    └────────┬─────────┘        │
-│                                                   │                  │
-│                                         ┌────────▼─────────┐        │
-│                                         │     RWAToken     │        │
-│                                         │ (compliance-gated)│        │
-│                                         └──────────────────┘        │
+│  ┌──────────────────────┐   ┌──────────────────────┐                │
+│  │ Example dApp (React)  │──▶│ tlsn-wasm (Verifier)  │                │
+│  └──────────┬───────────┘   └──────────┬───────────┘                │
+│             │ WebSocket                │ HTTP                        │
+│             ▼                          ▼                             │
+│   ┌──────────────────┐        ┌──────────────────────┐              │
+│   │ Prover Server     │        │ Relayer (Verifier +  │              │
+│   │ (Rust, MPC-TLS)   │        │ chain writer)        │              │
+│   └──────────┬────────┘        └──────────┬───────────┘              │
+│              │ HTTPS (target)              │ ethers.js                │
+│              ▼                             ▼                         │
+│        ┌──────────────┐          ┌──────────────────────────┐        │
+│        │ Mock Bank     │          │ Mantle Sepolia (5003)     │        │
+│        │ (demo source) │          │ IdentityRegistry + Vault  │        │
+│        └──────────────┘          └──────────────────────────┘        │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Quick Start
+## Repo layout
+
+```
+yieldloop/
+├── packages/
+│   ├── client-sdk/              # @zk-rwa-kit/client-sdk (proof submit, helpers)
+│   ├── contracts/               # Solidity: IdentityRegistry, ZkOracle, etc.
+│   └── relayer/                 # Express relayer: proof verification + chain writes
+├── services/
+│   ├── prover-server/           # Rust TLSNotary prover server
+│   └── mock-bank/               # Demo HTTPS target / eligibility source
+├── examples/
+│   ├── token-transfer/          # Reference dApp: token flow
+│   └── yield-vault/             # Reference dApp: vault flow
+├── docker-compose.yml
+├── Caddyfile                    # Local HTTPS + COOP/COEP headers
+└── env.example
+```
+
+## Quick start (local)
 
 ### Prerequisites
 
 - Node.js 18+
 - pnpm 8+
-- Docker & Docker Compose
-- Rust (for prover-server)
+- Docker + Docker Compose
+- Rust toolchain (only if running the prover server outside Docker)
 
 ### Setup
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-org/zk-rwa-kit
-cd zk-rwa-kit
-
-# 2. Copy environment file
 cp env.example .env
-# Edit .env and add your PRIVATE_KEY
-
-# 3. Install dependencies
 pnpm install
-
-# 4. Build and deploy contracts
 pnpm build:contracts
 pnpm deploy
-# Copy the output addresses to .env
-
-# 5. Generate SSL certificates (for local HTTPS)
 pnpm generate-certs
-
-# 6. Start all services with Docker
-pnpm docker:build
-pnpm docker:up
-
-# 7. Open https://localhost in your browser
 ```
 
-### Development (without Docker)
+### Run services
 
 ```bash
-# Terminal 1: Start local Hardhat node
+pnpm docker:build
+pnpm docker:up
+```
+
+> Note: `docker-compose.yml` currently references `./apps/*` build contexts, while this repo uses `./services/*` and `./examples/*`. If you hit build-context errors, update those paths (or run services manually; see below).
+
+### Run manually (without Docker)
+
+```bash
+# Terminal 1: contracts (local hardhat node)
 pnpm dev:contracts
 
-# Terminal 2: Start relayer
+# Terminal 2: relayer
 pnpm dev:relayer
 
-# Terminal 3: Start mock bank
+# Terminal 3: mock bank
 pnpm dev:mock-bank
 
-# Terminal 4: Build and run prover server
-cd apps/prover-server && cargo run
+# Terminal 4: prover server (Rust)
+cd services/prover-server && cargo run
 
-# Terminal 5: Start webapp (needs COOP/COEP headers)
-cd apps/webapp && pnpm dev
+# Terminal 5: example dapp
+cd examples/yield-vault && pnpm dev
 ```
 
-## Project Structure
+## Demo flow (what to show)
 
-```
-zk-rwa-kit/
-├── packages/
-│   ├── contracts/           # Solidity contracts (@zk-rwa-kit/contracts)
-│   │   ├── contracts/       # ZkOracle, IdentityRegistry, ComplianceModule, RWAToken
-│   │   ├── scripts/         # Deployment scripts
-│   │   └── test/            # Contract tests
-│   │
-│   └── relayer/             # Relayer service (@zk-rwa-kit/relayer)
-│       └── src/             # Express server, chain writes
-│
-├── apps/
-│   ├── webapp/              # React webapp with WASM verifier
-│   │   ├── src/             # React components
-│   │   └── tlsn-wasm-pkg/   # TLSNotary WASM binaries
-│   │
-│   ├── prover-server/       # Rust TLSNotary prover
-│   │   └── src/             # MPC-TLS implementation
-│   │
-│   └── mock-bank/           # Mock bank API for demos
-│
-├── docker-compose.yml       # Orchestration for all services
-├── Caddyfile               # Reverse proxy with COOP/COEP headers
-└── IMPLEMENTATION_PLAN.md   # Detailed technical documentation
-```
-
-## Packages
-
-| Package | Description | 
-|---------|-------------|
-| `@zk-rwa-kit/contracts` | Solidity contracts: ZkOracle, IdentityRegistry, ComplianceModule, RWAToken |
-| `@zk-rwa-kit/relayer` | Express service for proof verification and gas-sponsored chain writes |
-
-## Smart Contracts
-
-| Contract | Description |
-|----------|-------------|
-| `ZkOracle` | Receives verified claims from relayer, writes to IdentityRegistry |
-| `IdentityRegistry` | Stores identity claims (eligible, accredited, etc.) by address |
-| `ComplianceModule` | Implements `canTransfer()` check for token operations |
-| `RWAToken` | ERC-20 with compliance-gated mint and transfer |
-
-## User Flow
-
-1. **Connect Wallet** - User connects MetaMask to Mantle Sepolia
-2. **Generate Proof** - Browser connects to prover server via WebSocket
-3. **MPC-TLS Verification** - Prover fetches data from mock bank using TLSNotary
-4. **Proof Verification** - WASM verifier in browser validates the proof
-5. **Submit to Chain** - Relayer receives proof and writes claim to ZkOracle
-6. **Token Operations** - User can now mint/transfer RWA tokens
-
-## Network Configuration
-
-- **Network**: Mantle Sepolia Testnet
-- **Chain ID**: 5003
-- **RPC**: https://rpc.sepolia.mantle.xyz
-- **Explorer**: https://sepolia.mantlescan.xyz
+1. Connect wallet (Mantle Sepolia).
+2. Generate TLS proof (client talks to prover server).
+3. Submit proof (relayer verifies and writes a SessionCredential on-chain).
+4. Enter the vault and deposit/withdraw within the compliant perimeter.
 
 ## Scripts
 
 ```bash
-pnpm build:contracts   # Compile Solidity contracts
-pnpm test:contracts    # Run contract tests
-pnpm deploy            # Deploy to Mantle Sepolia
-pnpm docker:build      # Build all Docker images
-pnpm docker:up         # Start all services
-pnpm docker:down       # Stop all services
-pnpm generate-certs    # Generate self-signed SSL certs
+pnpm build             # build all workspaces
+pnpm build:contracts   # compile contracts
+pnpm deploy            # deploy to Mantle Sepolia
+pnpm dev:contracts     # local hardhat node
+pnpm dev:relayer       # relayer dev server
+pnpm dev:mock-bank     # mock bank dev server
+pnpm docker:up         # docker compose up
+pnpm docker:down       # docker compose down
+pnpm generate-certs    # generate local HTTPS certs
 ```
 
-## Documentation
+## Security notes
 
-- [Implementation Plan](./IMPLEMENTATION_PLAN.md) - Detailed technical blueprint
-- [Contracts](./packages/contracts/README.md) - Smart contract documentation
-
-## Security Notes
-
-⚠️ **This is hackathon code - not production ready**
-
-- Private keys should never be committed
-- The mock bank is for demo purposes only
-- TLS proofs are verified by a single prover server
+- Never commit real private keys
+- Proof verification is centralized in the MVP relayer
 - Rate limiting is basic
-
-## Future Roadmap
-
-- [ ] Full ERC-3643 compatibility
-- [ ] Decentralized notary network
-- [ ] TLS 1.3 support
-- [ ] ZK-Email integration
-- [ ] Multi-chain deployment
 
 ## License
 
 MIT
-
----
-
-Built with ❤️ for Mantle Global Hackathon 2025
