@@ -13,13 +13,23 @@ export {
 } from './prover';
 export {
   submitProof,
+  checkTransactionStatus,
+  waitForConfirmation,
   type SubmitOptions,
   type SubmitResult,
 } from './submitter';
 
 // Utilities
 export { serializeTranscript, deserializeTranscript } from './serializer';
-export { extractField, parseJsonFromTranscript } from './extractor';
+export { transcriptToString } from './serializer';
+export {
+  extractField,
+  parseJsonFromTranscript,
+  extractClaims,
+  extractFields,
+  hasFieldValue,
+  isEligibleFromTranscript,
+} from './extractor';
 
 // Types
 export * from './types';

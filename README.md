@@ -57,6 +57,66 @@ Reference flows that enforce “only eligible users (and optionally eligible int
 
 This makes RWA-like workflows **DeFi-compatible within a compliant perimeter** instead of “free-trading”.
 
+## SDK Usage
+
+The main developer entrypoint is `@zk-rwa-kit/client-sdk`.
+
+### Install
+
+```bash
+pnpm add @zk-rwa-kit/client-sdk
+```
+
+### Core API
+
+- **`proveEligibility(options?)`** → generates a TLSNotary-backed `VerifiedTranscript`
+  - Key options: `proverUrl`, `timeout`, `demoMode`, `maxSentData`, `maxRecvData`
+- **`submitProof(walletAddress, transcript, options?)`** → sends the proof to the relayer which writes an on-chain SessionCredential
+  - Key options: `relayerUrl`, `claimType` (default `CLAIM_TYPES.ELIGIBLE`), `extractedValue`, `timeout`
+- **Status helpers**: `checkTransactionStatus(txHash)` and `waitForConfirmation(txHash)`
+- **Utilities**: `serializeTranscript`, `deserializeTranscript`, `transcriptToString`, `extractClaims`, `extractField`, `parseJsonFromTranscript`
+- **Constants**: `DEFAULT_PROVER_URL`, `DEFAULT_RELAYER_URL`, `MANTLE_SEPOLIA_CONFIG`, `CLAIM_TYPES`, `MAX_SENT_DATA`, `MAX_RECV_DATA`
+
+### Minimal usage
+
+```ts
+import {
+  CLAIM_TYPES,
+  DEFAULT_PROVER_URL,
+  DEFAULT_RELAYER_URL,
+  proveEligibility,
+  submitProof,
+  extractClaims,
+  transcriptToString,
+} from '@zk-rwa-kit/client-sdk';
+
+// 1) Generate proof (use demoMode for deterministic demos)
+const prove = await proveEligibility({
+  proverUrl: DEFAULT_PROVER_URL,
+  demoMode: false,
+});
+if (!prove.success || !prove.transcript) throw new Error(prove.error);
+
+// Optional: inspect extracted fields locally
+const { received } = transcriptToString(prove.transcript);
+const claims = extractClaims(received);
+console.log('claims:', claims);
+
+// 2) Submit proof (relayer verifies + pays gas to write the claim on-chain)
+const walletAddress = '0x0000000000000000000000000000000000000000';
+const submit = await submitProof(walletAddress, prove.transcript, {
+  relayerUrl: DEFAULT_RELAYER_URL,
+  claimType: CLAIM_TYPES.ELIGIBLE,
+});
+if (!submit.success) throw new Error(submit.error);
+
+console.log('txHash:', submit.txHash);
+```
+
+### Browser requirement
+
+TLS proof generation requires `SharedArrayBuffer` (COOP/COEP headers). For local dev, use the included `Caddyfile` / reverse proxy that sets the required headers.
+
 ## Architecture (end-to-end flow)
 
 ```
