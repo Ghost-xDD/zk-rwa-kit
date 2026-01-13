@@ -29,19 +29,20 @@ export function extractField(text: string, fieldName: string): string | null {
  * Parse JSON from an HTTP response transcript
  * Handles the HTTP header portion and extracts just the JSON body
  */
-export function parseJsonFromTranscript(text: string): Record<string, unknown> | null {
+export function parseJsonFromTranscript(
+  text: string
+): Record<string, unknown> | null {
   try {
     // Find the start of JSON body (after headers)
     const jsonStart = text.indexOf('{');
     const jsonEnd = text.lastIndexOf('}');
-    
+
     if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
       return null;
     }
 
     const jsonString = text.slice(jsonStart, jsonEnd + 1);
     return JSON.parse(jsonString);
-
   } catch (error) {
     console.warn('Failed to parse JSON from transcript:', error);
     return null;
@@ -52,15 +53,15 @@ export function parseJsonFromTranscript(text: string): Record<string, unknown> |
  * Extract multiple fields from a transcript
  */
 export function extractFields(
-  text: string, 
+  text: string,
   fieldNames: string[]
 ): Record<string, string | null> {
   const result: Record<string, string | null> = {};
-  
+
   for (const fieldName of fieldNames) {
     result[fieldName] = extractField(text, fieldName);
   }
-  
+
   return result;
 }
 
@@ -68,8 +69,8 @@ export function extractFields(
  * Check if a transcript contains a specific field with expected value
  */
 export function hasFieldValue(
-  text: string, 
-  fieldName: string, 
+  text: string,
+  fieldName: string,
   expectedValue: string
 ): boolean {
   const actualValue = extractField(text, fieldName);

@@ -1,9 +1,6 @@
 /**
  * Proof verification service
- * 
- * In a production system, this would cryptographically verify the TLS proof.
- * For the hackathon MVP, we perform structural validation and trust the
- * browser-side WASM verifier.
+ * This service is used to validate the transcript and extract the claim data.
  */
 
 export interface Transcript {
@@ -26,33 +23,35 @@ export function validateTranscript(
   expectedValue?: string
 ): ValidationResult {
   try {
-    // Check transcript has required fields
     if (!transcript.received) {
-      return { valid: false, error: "Missing received data in transcript" };
+      return { valid: false, error: 'Missing received data in transcript' };
     }
 
     if (!transcript.serverName) {
-      return { valid: false, error: "Missing server name in transcript" };
+      return { valid: false, error: 'Missing server name in transcript' };
     }
 
     // Decode received data (base64)
     let receivedText: string;
     try {
-      receivedText = Buffer.from(transcript.received, "base64").toString("utf8");
+      receivedText = Buffer.from(transcript.received, 'base64').toString(
+        'utf8'
+      );
     } catch {
-      return { valid: false, error: "Invalid base64 encoding in transcript" };
+      return { valid: false, error: 'Invalid base64 encoding in transcript' };
     }
 
-    // Check for expected patterns in the response
-    // This validates that the proof contains data from a valid source
-    if (!receivedText.includes("eligible") && !receivedText.includes("ELIGIBLE")) {
-      console.warn("Transcript may not contain eligibility data");
-      // In demo mode, we allow this to pass
+    if (
+      !receivedText.includes('eligible') &&
+      !receivedText.includes('ELIGIBLE')
+    ) {
+      console.warn('Transcript may not contain eligibility data');
     }
 
-    // If expected value is provided, validate it matches
     if (expectedValue) {
-      const eligibleMatch = receivedText.match(/"eligible"\s*:\s*(true|false)/i);
+      const eligibleMatch = receivedText.match(
+        /"eligible"\s*:\s*(true|false)/i
+      );
       if (eligibleMatch) {
         const actualValue = eligibleMatch[1].toLowerCase();
         if (actualValue !== expectedValue.toLowerCase()) {
@@ -64,15 +63,16 @@ export function validateTranscript(
       }
     }
 
-    // Extract any fields we can find
     const extractedFields: Record<string, string> = {};
-    
+
     const eligibleMatch = receivedText.match(/"eligible"\s*:\s*(true|false)/i);
     if (eligibleMatch) {
       extractedFields.eligible = eligibleMatch[1].toLowerCase();
     }
 
-    const accreditedMatch = receivedText.match(/"accredited"\s*:\s*(true|false)/i);
+    const accreditedMatch = receivedText.match(
+      /"accredited"\s*:\s*(true|false)/i
+    );
     if (accreditedMatch) {
       extractedFields.accredited = accreditedMatch[1].toLowerCase();
     }
@@ -81,12 +81,11 @@ export function validateTranscript(
       valid: true,
       extractedFields,
     };
-
   } catch (error) {
-    console.error("Transcript validation error:", error);
+    console.error('Transcript validation error:', error);
     return {
       valid: false,
-      error: "Failed to validate transcript structure",
+      error: 'Failed to validate transcript structure',
     };
   }
 }
@@ -96,8 +95,10 @@ export function validateTranscript(
  */
 export function isDemoProof(transcript: Transcript): boolean {
   try {
-    const receivedText = Buffer.from(transcript.received, "base64").toString("utf8");
-    return receivedText.includes("demo") || receivedText.includes("mockbank");
+    const receivedText = Buffer.from(transcript.received, 'base64').toString(
+      'utf8'
+    );
+    return receivedText.includes('demo') || receivedText.includes('mockbank');
   } catch {
     return false;
   }

@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 import { proofRouter } from "./routes/proof";
 import { statusRouter } from "./routes/status";
+import { mintRouter } from "./routes/mint";
 
 // Load environment variables
 dotenv.config({ path: "../../.env" });
@@ -29,6 +30,7 @@ app.use(limiter);
 // Routes
 app.use("/submit-proof", proofRouter);
 app.use("/status", statusRouter);
+app.use("/mint", mintRouter);
 
 // Health check
 app.get("/health", (_req: Request, res: Response) => {
@@ -38,6 +40,7 @@ app.get("/health", (_req: Request, res: Response) => {
     chain: {
       rpc: process.env.MANTLE_SEPOLIA_RPC_URL ? "configured" : "missing",
       oracle: process.env.ZK_ORACLE_ADDRESS ? "configured" : "missing",
+      token: process.env.RWA_TOKEN_ADDRESS ? "configured" : "missing",
     },
   });
 });

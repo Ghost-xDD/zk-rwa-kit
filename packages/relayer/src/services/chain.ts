@@ -1,10 +1,8 @@
 import { ethers } from 'ethers';
 import dotenv from 'dotenv';
 
-// Load environment variables (must be done before accessing process.env)
 dotenv.config({ path: '../../.env' });
 
-// Initialize provider and wallet
 const RPC_URL =
   process.env.MANTLE_SEPOLIA_RPC_URL || 'https://rpc.sepolia.mantle.xyz';
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -16,11 +14,17 @@ if (!PRIVATE_KEY) {
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const wallet = PRIVATE_KEY ? new ethers.Wallet(PRIVATE_KEY, provider) : null;
 
-// ZkOracle ABI (minimal - just what we need)
 const ZK_ORACLE_ABI = [
   'function submitClaim(address subject, bytes32 claimType, bytes32 claimValue, uint256 expiry, bytes calldata proof) external',
   'function getClaim(address subject, bytes32 claimType) external view returns (bytes32 value, uint256 expiry)',
   'event ClaimSubmitted(address indexed subject, bytes32 indexed claimType, bytes32 claimValue, uint256 expiry)',
+];
+
+const MUSDY_ABI = [
+  'function mint(address to, uint256 amount) external',
+  'function balanceOf(address account) view returns (uint256)',
+  'function symbol() view returns (string)',
+  'event TokensMinted(address indexed to, uint256 amount)',
 ];
 
 /**
@@ -44,18 +48,12 @@ export async function submitClaimOnChain(
 
   const zkOracle = new ethers.Contract(zkOracleAddress, ZK_ORACLE_ABI, wallet);
 
-  // Convert claim type to bytes32 hash
   const claimTypeBytes32 = ethers.keccak256(ethers.toUtf8Bytes(claimType));
 
-  // Convert claim value to bytes32 (pad if needed)
-  const claimValueBytes32 = ethers.encodeBytes32String(
-    claimValue.slice(0, 31) // Max 31 chars for bytes32 string
-  );
+  const claimValueBytes32 = ethers.encodeBytes32String(claimValue.slice(0, 31));
 
-  // Set expiry to 30 days from now
   const expiry = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
 
-  // Create proof placeholder (the relayer has verified the proof off-chain)
   const proofPlaceholder = ethers.toUtf8Bytes('verified-by-relayer');
 
   console.log(`Submitting claim to ZkOracle at ${zkOracleAddress}`);
@@ -64,7 +62,6 @@ export async function submitClaimOnChain(
   console.log(`  Claim Value: ${claimValue}`);
   console.log(`  Expiry: ${new Date(expiry * 1000).toISOString()}`);
 
-  // Submit transaction
   const tx = await zkOracle.submitClaim(
     subject,
     claimTypeBytes32,
@@ -75,7 +72,6 @@ export async function submitClaimOnChain(
 
   console.log(`Transaction submitted: ${tx.hash}`);
 
-  // Don't wait for confirmation - return immediately
   return {
     txHash: tx.hash,
     expiry,
@@ -164,5 +160,53 @@ export async function getRelayerInfo(): Promise<{
     address: wallet.address,
     balance: ethers.formatEther(balance),
     nonce,
+  };
+}
+
+/**
+ * Mint mUSDY tokens to a verified address
+ */
+export async function mintTokens(
+  recipient: string,
+  amount: string
+): Promise<{ txHash: string; symbol: string }> {
+  if (!wallet) {
+    throw new Error(
+      'Wallet not configured - set PRIVATE_KEY environment variable'
+    );
+  }
+
+  const mUSDYAddress = process.env.MUSDY_ADDRESS;
+  if (!mUSDYAddress) {
+    throw new Error('MUSDY_ADDRESS not configured');
+  }
+
+  const verified = await isAddressVerified(recipient);
+  if (!verified) {
+    throw new Error('Recipient is not verified - cannot mint tokens');
+  }
+
+  const mUSDY = new ethers.Contract(mUSDYAddress, MUSDY_ABI, wallet);
+
+  let symbol = 'mUSDY';
+  try {
+    symbol = await mUSDY.symbol();
+  } catch {
+    // Use default if symbol() fails
+  }
+
+  const amountWei = ethers.parseUnits(amount, 18);
+
+  console.log(`Minting ${amount} ${symbol} to ${recipient}`);
+  console.log(`  Token contract: ${mUSDYAddress}`);
+  console.log(`  Amount (wei): ${amountWei.toString()}`);
+
+  const tx = await mUSDY.mint(recipient, amountWei);
+
+  console.log(`Mint transaction submitted: ${tx.hash}`);
+
+  return {
+    txHash: tx.hash,
+    symbol,
   };
 }

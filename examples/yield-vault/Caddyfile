@@ -1,0 +1,28 @@
+# Zk-RWA-Kit Webapp Caddy Configuration
+# Serves static files with required COOP/COEP headers for SharedArrayBuffer
+
+:8080 {
+    root * /usr/share/caddy
+
+    # Enable precompressed file serving
+    file_server {
+        precompressed br gzip
+    }
+
+    # SPA routing - fallback to index.html
+    try_files {path} {path}/ /index.html
+
+    # Cache static assets (WASM files especially)
+    @static path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg *.wasm
+    header @static Cache-Control "public, max-age=3600"
+
+    # CRITICAL: Required headers for SharedArrayBuffer (WASM threading)
+    # Without these, TLSNotary WASM will not work
+    header /* {
+        Cross-Origin-Embedder-Policy "require-corp"
+        Cross-Origin-Opener-Policy "same-origin"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+    }
+}

@@ -46,3 +46,8 @@ coverage/
 # Misc
 *.tgz
 .turbo/
+
+# Planning docs (local only)
+ROADMAP.md
+IMPLEMENTATION_PLAN.md
+overview.txt

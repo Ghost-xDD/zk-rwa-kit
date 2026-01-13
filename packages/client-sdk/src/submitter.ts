@@ -4,6 +4,28 @@ import { extractField } from './extractor';
 import { DEFAULT_RELAYER_URL, CLAIM_TYPES } from './constants';
 
 /**
+ * Response from the relayer's submit-proof endpoint
+ */
+interface RelayerSubmitResponse {
+  success: boolean;
+  txHash?: string;
+  claimType?: string;
+  claimValue?: string;
+  expiry?: number;
+  error?: string;
+  code?: string;
+}
+
+/**
+ * Response from the relayer's status endpoint
+ */
+interface RelayerStatusResponse {
+  status?: 'pending' | 'confirmed' | 'failed';
+  blockNumber?: number;
+  confirmations?: number;
+}
+
+/**
  * Options for proof submission
  */
 export interface SubmitOptions {
@@ -105,7 +127,7 @@ export async function submitProof(
 
     clearTimeout(timeoutId);
 
-    const data = await response.json();
+    const data = (await response.json()) as RelayerSubmitResponse;
 
     if (data.success) {
       return {
@@ -150,7 +172,7 @@ export async function checkTransactionStatus(
 ): Promise<TransactionResult> {
   try {
     const response = await fetch(`${relayerUrl}/status/${txHash}`);
-    const data = await response.json();
+    const data = (await response.json()) as RelayerStatusResponse;
 
     return {
       txHash,
@@ -159,7 +181,7 @@ export async function checkTransactionStatus(
       confirmations: data.confirmations,
     };
 
-  } catch (error) {
+  } catch {
     return {
       txHash,
       status: 'pending',

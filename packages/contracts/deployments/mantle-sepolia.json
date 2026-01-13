@@ -1,11 +1,12 @@
 {
-  "identityRegistry": "0x194E19AF9bfe69aDA8de9df3eAfAebbe60d0bC74",
-  "zkOracle": "0xC6816eBE0a22B1C2de557bEF30852fa8968D2296",
-  "complianceModule": "0x4E4a57AaE1c5Bbb81a428376a997CB6011844166",
-  "rwaToken": "0x312321b889F249B91DD4137EE795F92b753b7e2F",
+  "identityRegistry": "0x58698a19006443eD2e9F1e4284Bd0c341B1a5A12",
+  "zkOracle": "0x3321FD3C919D4D935c09E7854F5b10ee15215577",
+  "complianceModule": "0x172717c3f37684Aabf4F9a07dB45c98251dcCb52",
+  "mUSDY": "0x1AFF98321D111A555F56FE977B3cBc01704FECBF",
+  "mYieldVault": "0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170",
   "deployer": "0x311e26702ABa231c321C633d1ff6ecB4445f2308",
   "relayer": "0x311e26702ABa231c321C633d1ff6ecB4445f2308",
   "chainId": "5003",
   "network": "mantleSepolia",
-  "deployedAt": "2026-01-11T23:22:02.729Z"
+  "deployedAt": "2026-01-13T13:41:31.330Z"
 }

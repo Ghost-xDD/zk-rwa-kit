@@ -1,6 +1,9 @@
 import type { VerifiedTranscript } from './types';
 import { DEFAULT_PROVER_URL, MAX_SENT_DATA, MAX_RECV_DATA } from './constants';
 
+// Browser globals that may not exist in Node.js
+declare const Worker: unknown;
+
 /**
  * Options for proof generation
  */
@@ -32,34 +35,38 @@ export interface ProveResult {
  */
 const DEMO_TRANSCRIPT: VerifiedTranscript = {
   serverName: 'mock-bank.local',
-  sent: new TextEncoder().encode('GET /api/account HTTP/1.1\r\nHost: mock-bank.local\r\n\r\n'),
+  sent: new TextEncoder().encode(
+    'GET /api/account HTTP/1.1\r\nHost: mock-bank.local\r\n\r\n'
+  ),
   received: new TextEncoder().encode(
     'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n' +
-    '{"accountId":"ACC-12345678","eligible":true,"accredited":true,"kycVerified":true}'
+      '{"accountId":"ACC-12345678","eligible":true,"accredited":true,"kycVerified":true}'
   ),
   timestamp: Date.now(),
 };
 
 /**
  * Generate a TLS proof of eligibility using the prover server.
- * 
+ *
  * This function connects to the prover server via WebSocket and receives
  * a verified transcript after the MPC-TLS protocol completes.
- * 
+ *
  * @example
  * ```typescript
  * import { proveEligibility } from '@zk-rwa-kit/client-sdk';
- * 
+ *
  * const result = await proveEligibility({
  *   proverUrl: 'wss://localhost/prove',
  * });
- * 
+ *
  * if (result.success) {
  *   console.log('Verified server:', result.transcript.serverName);
  * }
  * ```
  */
-export async function proveEligibility(options: ProveOptions = {}): Promise<ProveResult> {
+export async function proveEligibility(
+  options: ProveOptions = {}
+): Promise<ProveResult> {
   const {
     proverUrl = DEFAULT_PROVER_URL,
     maxSentData = MAX_SENT_DATA,
@@ -82,22 +89,24 @@ export async function proveEligibility(options: ProveOptions = {}): Promise<Prov
   if (typeof SharedArrayBuffer === 'undefined') {
     return {
       success: false,
-      error: 'SharedArrayBuffer not available. Ensure COOP/COEP headers are set.',
+      error:
+        'SharedArrayBuffer not available. Ensure COOP/COEP headers are set.',
     };
   }
 
   try {
     // Dynamic import of tlsn-wasm (peer dependency)
     const tlsnWasm = await import('tlsn-wasm');
-    
+
     // Initialize WASM if not already done
     await tlsnWasm.default?.();
 
     // Create verifier instance
+    // Note: We cast to 'any' because tlsn-wasm types may vary between versions
     const verifier = new tlsnWasm.Verifier({
       max_sent_data: maxSentData,
       max_recv_data: maxRecvData,
-    });
+    } as any);
 
     // Connect to prover server with timeout
     const connectPromise = verifier.connect(proverUrl);
@@ -131,11 +140,11 @@ export async function proveEligibility(options: ProveOptions = {}): Promise<Prov
       success: true,
       transcript,
     };
-
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     console.error('[SDK] Proof generation failed:', errorMessage);
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -147,5 +156,7 @@ export async function proveEligibility(options: ProveOptions = {}): Promise<Prov
  * Check if the browser supports TLS proof generation
  */
 export function isProverSupported(): boolean {
-  return typeof SharedArrayBuffer !== 'undefined' && typeof Worker !== 'undefined';
+  return (
+    typeof SharedArrayBuffer !== 'undefined' && typeof Worker !== 'undefined'
+  );
 }

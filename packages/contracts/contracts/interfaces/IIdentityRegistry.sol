@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 /**
  * @title IIdentityRegistry
  * @notice Interface for the Identity Registry that stores verified identity claims
- * @dev Designed to be compatible with future ERC-3643 migration
+ * @dev Designed to be compatible with ERC-3643 migration
  */
 interface IIdentityRegistry {
     /**

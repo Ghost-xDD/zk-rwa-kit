@@ -1,5 +1,5 @@
 use http::Uri;
-/// Configuration constants for the TLSNotary demo server
+/// Configuration constants for the TLSNotary server
 
 /// Maximum number of bytes that can be sent from prover to server
 pub const MAX_SENT_DATA: usize = 148;

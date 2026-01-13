@@ -3,7 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "description": "Privacy-preserving compliance-gated RWA toolkit for Mantle",
-  "keywords": ["rwa", "zk", "tlsnotary", "mantle", "compliance", "erc3643"],
+  "keywords": [
+    "rwa",
+    "zk",
+    "tlsnotary",
+    "mantle",
+    "compliance",
+    "erc3643"
+  ],
   "license": "MIT",
   "author": "Zk-RWA-Kit Contributors",
   "scripts": {

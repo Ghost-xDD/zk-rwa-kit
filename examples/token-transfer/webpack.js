@@ -6,7 +6,10 @@ var webpack = require('webpack'),
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
-var alias = {};
+var alias = {
+  // Ensure all tlsn-wasm imports resolve to the local package
+  'tlsn-wasm': path.resolve(__dirname, 'tlsn-wasm-pkg'),
+};
 
 var fileExtensions = [
   'jpg',
@@ -43,7 +46,7 @@ var options = {
         test: /\.wasm$/,
         type: 'asset/resource',
         generator: {
-          filename: '[name][ext]',
+          filename: 'wasm/[name].[contenthash:8][ext]',
         },
       },
       {
@@ -59,7 +62,9 @@ var options = {
         ],
       },
       {
-        test: new RegExp('.(' + fileExtensions.filter(ext => ext !== 'svg').join('|') + ')$'),
+        test: new RegExp(
+          '.(' + fileExtensions.filter((ext) => ext !== 'svg').join('|') + ')$'
+        ),
         type: 'asset/resource',
         exclude: /node_modules/,
       },
@@ -121,11 +126,13 @@ var options = {
     alias: alias,
     extensions: fileExtensions
       .map((extension) => '.' + extension)
-      .concat(['.js', '.jsx', '.ts', '.tsx', '.css', 'svg']),
+      .concat(['.js', '.jsx', '.ts', '.tsx', '.css', '.svg']),
     fallback: {
       crypto: require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
       vm: require.resolve('vm-browserify'),
+      process: require.resolve('process/browser'),
+      buffer: require.resolve('buffer/'),
     },
   },
   plugins: [
@@ -157,10 +164,32 @@ var options = {
       Buffer: ['buffer', 'Buffer'],
     }),
     new webpack.DefinePlugin({
-      'process.env.PROVER_PROXY_URL': JSON.stringify(process.env.PROVER_PROXY_URL || 'ws://localhost:9816/prove'),
+      'process.env.PROVER_PROXY_URL': JSON.stringify(
+        process.env.PROVER_PROXY_URL || 'ws://localhost:9816/prove'
+      ),
+      'process.env.RELAYER_URL': JSON.stringify(
+        process.env.RELAYER_URL || 'http://localhost:3001'
+      ),
+      'process.env.CHAIN_EXPLORER_URL': JSON.stringify(
+        process.env.CHAIN_EXPLORER_URL || 'https://sepolia.mantlescan.xyz'
+      ),
+      // Contract addresses (passed during build or from env)
+      'process.env.MUSDY_ADDRESS': JSON.stringify(
+        process.env.MUSDY_ADDRESS || ''
+      ),
+      'process.env.MYIELD_VAULT_ADDRESS': JSON.stringify(
+        process.env.MYIELD_VAULT_ADDRESS || ''
+      ),
+      'process.env.IDENTITY_REGISTRY_ADDRESS': JSON.stringify(
+        process.env.IDENTITY_REGISTRY_ADDRESS || ''
+      ),
       'process.env.POAP_LINK': JSON.stringify(process.env.POAP_LINK || ''),
-      'process.env.GIT_COMMIT_SHA': JSON.stringify(process.env.GITHUB_SHA || ''),
-      'process.env.GITHUB_REPOSITORY': JSON.stringify(process.env.GITHUB_REPOSITORY || ''),
+      'process.env.GIT_COMMIT_SHA': JSON.stringify(
+        process.env.GITHUB_SHA || ''
+      ),
+      'process.env.GITHUB_REPOSITORY': JSON.stringify(
+        process.env.GITHUB_REPOSITORY || ''
+      ),
     }),
     // Precompress wasm and js files with gzip
     new CompressionPlugin({
