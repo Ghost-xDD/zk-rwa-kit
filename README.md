@@ -17,7 +17,7 @@
 
 ---
 
-## 🎯 The Problem
+##  The Problem
 
 RWAs today force a bad trade-off: **privacy or composability — pick one.**
 
@@ -27,7 +27,7 @@ RWAs today force a bad trade-off: **privacy or composability — pick one.**
 | 🔧 **Developers hit dead ends** | ERC-3643-style tokens break standard DeFi. Transfers fail because AMMs and users aren't on the allowlist.               |
 | 🧩 **Ecosystems lack tooling**  | No plug-and-play way to turn private eligibility proofs into composable compliance.                                     |
 
-## ✨ The Solution
+##  The Solution
 
 Zk-RWA-Kit creates a **compliant perimeter** where RWAs become DeFi-composable among verified participants — without permanent public allowlists.
 
@@ -73,7 +73,7 @@ const { txHash } = await submitProof(walletAddress, transcript, {
 
 > **Note:** TLS proofs require `SharedArrayBuffer`. Add COOP/COEP headers to your app. See [docs](https://zk-rwa-kit-docs.vercel.app/getting-started/quick-start#browser-requirements).
 
-## 📦 What's in the Kit
+##  What's in the Kit
 
 | Component                                           | Description                                       |
 | --------------------------------------------------- | ------------------------------------------------- |
@@ -84,7 +84,7 @@ const { txHash } = await submitProof(walletAddress, transcript, {
 | **[Token Demo](./examples/token-transfer)**         | Reference dApp: compliant token transfers         |
 | **[Vault Demo](./examples/yield-vault)**            | Reference dApp: compliant ERC-4626 vault          |
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -108,7 +108,7 @@ const { txHash } = await submitProof(walletAddress, transcript, {
     └──────────────────┘        └──────────────────────────┘
 ```
 
-## 📁 Repo Structure
+##  Repo Structure
 
 ```
 zk-rwa-kit/
@@ -127,7 +127,7 @@ zk-rwa-kit/
 └── docker-compose.yml
 ```
 
-## 🛠️ Local Development
+##  Local Development
 
 ### Prerequisites
 
@@ -162,7 +162,7 @@ cd services/prover-server && cargo run
 cd examples/yield-vault && pnpm dev
 ```
 
-## 🔗 Live Deployments
+##  Live Deployments
 
 | Service           | URL                                                                |
 | ----------------- | ------------------------------------------------------------------ |
@@ -173,7 +173,7 @@ cd examples/yield-vault && pnpm dev
 | **Prover Server** | `wss://zk-rwa-prover-production.up.railway.app/prove`              |
 | **Relayer API**   | `https://zk-rwa-kitrelayer-production.up.railway.app`              |
 
-## 📋 Deployed Contracts (Mantle Sepolia)
+##  Deployed Contracts (Mantle Sepolia)
 
 | Contract           | Address                                      |
 | ------------------ | -------------------------------------------- |
@@ -181,12 +181,11 @@ cd examples/yield-vault && pnpm dev
 | mUSDY (Mock Token) | `0x1AFF98321D111A555F56FE977B3cBc01704FECBF` |
 | mYieldVault        | `0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170` |
 
-## 🔐 Security Notes
+##  Security Notes
 
 - **Relayer is trusted** in the MVP — it verifies proofs off-chain
 - **Session credentials expire** after 24 hours
 - **Never commit private keys** — use environment variables
-- Future: On-chain ZK verification
 
 ## 📚 Learn More
 
