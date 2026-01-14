@@ -2,22 +2,16 @@
 
 # ⬡ Zk-RWA-Kit
 
-<p align="center">
-  Privacy-preserving compliance for Real World Assets on Mantle.<br/>
-  <strong>Session credentials that expire — not permanent allowlists.</strong>
-</p>
+Privacy-preserving compliance for Real World Assets on Mantle.  
+**Session credentials that expire — not permanent allowlists.**
 
-<p align="center">
-  <a href="https://zk-rwa-kit-docs.vercel.app">Documentation</a> ·
-  <a href="https://zk-rwa-kit-yield.vercel.app">Live Demo</a> ·
-  <a href="https://www.npmjs.com/package/@zk-rwa-kit/client-sdk">npm</a>
-</p>
+[Documentation](https://zk-rwa-kit-docs.vercel.app) · [Live Demo](https://zk-rwa-kit-yield.vercel.app) · [npm](https://www.npmjs.com/package/@zk-rwa-kit/client-sdk)
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/@zk-rwa-kit/client-sdk"><img src="https://img.shields.io/npm/v/@zk-rwa-kit/client-sdk?style=flat-square&color=cb3837" alt="npm" /></a>
-  <a href="https://sepolia.mantlescan.xyz"><img src="https://img.shields.io/badge/chain-Mantle_Sepolia-65b3ae?style=flat-square" alt="Mantle" /></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-f5a623?style=flat-square" alt="MIT" /></a>
-</p>
+[![npm](https://img.shields.io/npm/v/@zk-rwa-kit/client-sdk?style=flat-square&color=cb3837)](https://www.npmjs.com/package/@zk-rwa-kit/client-sdk)
+[![Mantle](https://img.shields.io/badge/chain-Mantle_Sepolia-65b3ae?style=flat-square)](https://sepolia.mantlescan.xyz)
+[![MIT](https://img.shields.io/badge/license-MIT-f5a623?style=flat-square)](https://opensource.org/licenses/MIT)
+
+</div>
 
 ---
 
