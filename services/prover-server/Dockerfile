@@ -5,7 +5,7 @@ FROM rust:1.90 AS builder
 WORKDIR /app
 
 # Copy the Cargo.toml and Cargo.lock files
-COPY Cargo.toml Cargo.lock ./
+COPY services/prover-server/Cargo.toml services/prover-server/Cargo.lock ./
 
 # Create a dummy main.rs to cache dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs
@@ -14,7 +14,7 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release && rm -rf src
 
 # Copy the actual source code
-COPY src ./src
+COPY services/prover-server/src ./src
 
 # Build the application
 RUN cargo build --release
