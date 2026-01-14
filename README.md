@@ -23,13 +23,13 @@ RWAs today force a bad trade-off: **privacy or composability — pick one.**
 
 | Pain Point                      | Description                                                                                                             |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 👤 **Users lose privacy**       | To access compliant RWA yield, users must permanently link their wallet to KYC — doxxing their entire on-chain history. |
+| 👤 **Users lose privacy**       | To access compliant RWA yield, users must permanently link their wallet to KYC, doxxing their entire on-chain history. |
 | 🔧 **Developers hit dead ends** | ERC-3643-style tokens break standard DeFi. Transfers fail because AMMs and users aren't on the allowlist.               |
 | 🧩 **Ecosystems lack tooling**  | No plug-and-play way to turn private eligibility proofs into composable compliance.                                     |
 
 ##  The Solution
 
-Zk-RWA-Kit creates a **compliant perimeter** where RWAs become DeFi-composable among verified participants — without permanent public allowlists.
+Zk-RWA-Kit creates a **compliant perimeter** where RWAs become DeFi-composable among verified participants without permanent public allowlists.
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
