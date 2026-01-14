@@ -992,14 +992,22 @@ function App(): ReactElement {
                   <div
                     className={cn(
                       'rounded-full px-3 py-1 text-xs border',
-                      isVerifiedOnChain
-                        ? 'border-green-500/40 bg-green-500/10 text-green-200'
-                        : 'border-amber-500/40 bg-amber-500/10 text-amber-200'
+                      step === 'prove' && processing
+                        ? 'border-amber-500/40 bg-amber-500/10 text-amber-200'
+                        : step === 'submit' && processing
+                          ? 'border-amber-500/40 bg-amber-500/10 text-amber-200'
+                          : isVerifiedOnChain
+                            ? 'border-green-500/40 bg-green-500/10 text-green-200'
+                            : 'border-amber-500/40 bg-amber-500/10 text-amber-200'
                     )}
                   >
-                    {isVerifiedOnChain
-                      ? 'SessionCredential on-chain'
-                      : 'Not submitted'}
+                    {step === 'prove' && processing
+                      ? 'Verifying…'
+                      : step === 'submit' && processing
+                        ? 'Submitting…'
+                        : isVerifiedOnChain
+                          ? 'SessionCredential on-chain'
+                          : 'Not submitted'}
                   </div>
                 </div>
                 <div className="mt-3 text-sm text-mantle-muted">
@@ -1013,7 +1021,11 @@ function App(): ReactElement {
                       Vault access
                     </div>
                     <div className="mt-2 text-sm font-semibold">
-                      {vaultEligible ? (
+                      {step === 'prove' && processing ? (
+                        <span className="text-amber-300">Verifying…</span>
+                      ) : step === 'submit' && processing ? (
+                        <span className="text-amber-300">Submitting…</span>
+                      ) : vaultEligible ? (
                         <span className="text-green-300">Eligible</span>
                       ) : (
                         <span className="text-red-300">Restricted</span>
