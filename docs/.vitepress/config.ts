@@ -35,7 +35,7 @@ export default defineConfig({
           { text: 'Yield Vault', link: 'https://zk-rwa-kit-yield.vercel.app' },
         ],
       },
-      { text: 'GitHub', link: 'https://github.com/user/zk-rwa-kit' },
+      { text: 'GitHub', link: 'https://github.com/Ghost-xDD/zk-rwa-kit' },
     ],
 
     sidebar: {
@@ -92,7 +92,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/user/zk-rwa-kit' },
+      { icon: 'github', link: 'https://github.com/Ghost-xDD/zk-rwa-kit' },
     ],
 
     footer: {
@@ -105,7 +105,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/user/zk-rwa-kit/edit/main/docs/:path',
+      pattern: 'https://github.com/Ghost-xDD/zk-rwa-kit/edit/main/docs/:path',
       text: 'Edit this page on GitHub',
     },
   },

@@ -12,7 +12,7 @@ Deploy the Zk-RWA-Kit contracts to Mantle Sepolia.
 
 ```bash
 # Clone and install
-git clone https://github.com/user/zk-rwa-kit.git
+git clone https://github.com/Ghost-xDD/zk-rwa-kit.git
 cd zk-rwa-kit
 pnpm install
 

@@ -12,7 +12,7 @@ Run your own relayer for production deployments.
 
 ```bash
 # Clone the repo
-git clone https://github.com/user/zk-rwa-kit.git
+git clone https://github.com/Ghost-xDD/zk-rwa-kit.git
 cd zk-rwa-kit
 
 # Install dependencies

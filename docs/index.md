@@ -11,7 +11,7 @@ hero:
       link: /getting-started/introduction
     - theme: alt
       text: View on GitHub
-      link: https://github.com/user/zk-rwa-kit
+      link: https://github.com/Ghost-xDD/zk-rwa-kit
     - theme: alt
       text: Try Demo
       link: https://zk-rwa-kit-yield.vercel.app

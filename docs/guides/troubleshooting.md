@@ -204,7 +204,7 @@ console.log('Claims:', extractClaims(received));
 
 ## Getting Help
 
-1. Check the [GitHub Issues](https://github.com/user/zk-rwa-kit/issues)
+1. Check the [GitHub Issues](https://github.com/Ghost-xDD/zk-rwa-kit/issues)
 2. Review the [Architecture](/getting-started/architecture) docs
 3. Look at the [example apps](https://zk-rwa-kit-yield.vercel.app) source code
 

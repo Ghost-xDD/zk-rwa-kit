@@ -139,7 +139,7 @@ These are the deployed contract addresses for the demo:
 | mYieldVault        | `0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170` |
 
 ::: info
-Check the [deployments file](https://github.com/user/zk-rwa-kit/blob/main/packages/contracts/deployments/mantle-sepolia.json) for the latest addresses.
+Check the [deployments file](https://github.com/Ghost-xDD/zk-rwa-kit/blob/main/packages/contracts/deployments/mantle-sepolia.json) for the latest addresses.
 :::
 
 ## Next Steps
