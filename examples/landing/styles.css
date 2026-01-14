@@ -26,9 +26,14 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  font-family:
+    'Instrument Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a {
@@ -38,7 +43,7 @@ a {
 
 code,
 .mono {
-  font-family: "DM Mono", monospace;
+  font-family: 'DM Mono', monospace;
   font-size: 0.9em;
 }
 
@@ -47,7 +52,11 @@ code,
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start),
+    var(--gradient-end)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -58,8 +67,10 @@ code,
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 28px 7vw 56px;
-  background-image: radial-gradient(
+  padding: 28px max(24px, 7vw) 56px;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(
       ellipse 80% 60% at 10% 0%,
       rgba(101, 179, 174, 0.12),
       transparent 50%
@@ -185,7 +196,11 @@ main {
   justify-content: center;
   padding: 13px 26px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start),
+    var(--gradient-end)
+  );
   color: #062224;
   font-weight: 600;
   font-size: 0.95rem;
@@ -239,7 +254,11 @@ main {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start),
+    var(--gradient-end)
+  );
   color: #062224;
   display: grid;
   place-items: center;
@@ -478,7 +497,11 @@ main {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start),
+    var(--gradient-end)
+  );
   color: #062224;
   font-weight: 700;
   font-size: 1.2rem;
@@ -577,7 +600,10 @@ main {
   border: 1px solid var(--border);
   border-radius: 20px;
   overflow: hidden;
-  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s,
+    transform 0.25s;
 }
 
 .demo-card:hover {
@@ -628,7 +654,7 @@ main {
   text-align: center;
   font-size: 0.78rem;
   color: var(--muted);
-  font-family: "DM Mono", monospace;
+  font-family: 'DM Mono', monospace;
 }
 
 .demo-visual {
@@ -678,7 +704,11 @@ main {
 }
 
 .mock-step.active {
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start),
+    var(--gradient-end)
+  );
   border-color: transparent;
   color: #062224;
   font-weight: 600;
@@ -845,25 +875,31 @@ main {
 }
 
 @media (max-width: 768px) {
+  .page {
+    padding: 20px 20px 36px;
+  }
+
   .nav {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .logo {
+    justify-content: center;
   }
 
   .nav-links {
     margin-left: 0;
+    justify-content: center;
     flex-wrap: wrap;
-    gap: 14px;
+    gap: 12px 20px;
   }
 
   .nav-cta {
     width: 100%;
     text-align: center;
-  }
-
-  .page {
-    padding: 20px 5vw 36px;
+    padding: 12px 18px;
   }
 
   .hero {
@@ -1035,7 +1071,11 @@ main {
 
 @media (max-width: 480px) {
   .page {
-    padding: 16px 4vw 28px;
+    padding: 16px 16px 28px;
+  }
+
+  .nav {
+    gap: 14px;
   }
 
   .logo {
@@ -1052,7 +1092,12 @@ main {
   }
 
   .nav-links {
-    gap: 10px;
+    gap: 10px 16px;
+    font-size: 0.85rem;
+  }
+
+  .nav-cta {
+    padding: 10px 16px;
     font-size: 0.85rem;
   }
 
