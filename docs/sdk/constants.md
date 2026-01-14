@@ -131,12 +131,13 @@ import type {
 
 These are the deployed contract addresses for the demo:
 
-| Contract           | Address                                      |
-| ------------------ | -------------------------------------------- |
-| IdentityRegistry   | `0x58698a19006443eD2e9F1e4284Bd0c341B1a5A12` |
-| ZkOracle           | `0x...`                                      |
-| mUSDY (Mock Token) | `0x1AFF98321D111A555F56FE977B3cBc01704FECBF` |
-| mYieldVault        | `0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170` |
+| Contract          | Address                                      |
+| ----------------- | -------------------------------------------- |
+| IdentityRegistry  | `0x58698a19006443eD2e9F1e4284Bd0c341B1a5A12` |
+| ZkOracle          | `0x3321FD3C919D4D935c09E7854F5b10ee15215577` |
+| ComplianceModule  | `0x172717c3f37684Aabf4F9a07dB45c98251dcCb52` |
+| mUSDY (Mock USDY) | `0x1AFF98321D111A555F56FE977B3cBc01704FECBF` |
+| mYieldVault       | `0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170` |
 
 ::: info
 Check the [deployments file](https://github.com/Ghost-xDD/zk-rwa-kit/blob/main/packages/contracts/deployments/mantle-sepolia.json) for the latest addresses.

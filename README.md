@@ -1,8 +1,6 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Ghost-xDD/zk-rwa-kit/main/docs/public/logo.svg" width="60" alt="Zk-RWA-Kit" />
-</p>
+<div align="center">
 
-<h1 align="center">Zk-RWA-Kit</h1>
+# ⬡ Zk-RWA-Kit
 
 <p align="center">
   Privacy-preserving compliance for Real World Assets on Mantle.<br/>
@@ -16,9 +14,9 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@zk-rwa-kit/client-sdk"><img src="https://img.shields.io/npm/v/@zk-rwa-kit/client-sdk?style=flat-square&labelColor=000&color=000" alt="npm" /></a>
-  <a href="https://sepolia.mantlescan.xyz"><img src="https://img.shields.io/badge/chain-Mantle_Sepolia-000?style=flat-square&labelColor=000" alt="Mantle" /></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-000?style=flat-square&labelColor=000" alt="MIT" /></a>
+  <a href="https://www.npmjs.com/package/@zk-rwa-kit/client-sdk"><img src="https://img.shields.io/npm/v/@zk-rwa-kit/client-sdk?style=flat-square&color=cb3837" alt="npm" /></a>
+  <a href="https://sepolia.mantlescan.xyz"><img src="https://img.shields.io/badge/chain-Mantle_Sepolia-65b3ae?style=flat-square" alt="Mantle" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-f5a623?style=flat-square" alt="MIT" /></a>
 </p>
 
 ---
@@ -202,11 +200,13 @@ zk-rwa-kit/
 
 ### Contracts (Mantle Sepolia)
 
-| Contract         | Address                                                                                                                           |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| IdentityRegistry | [`0x58698a19006443eD2e9F1e4284Bd0c341B1a5A12`](https://sepolia.mantlescan.xyz/address/0x58698a19006443eD2e9F1e4284Bd0c341B1a5A12) |
-| mUSDY            | [`0x1AFF98321D111A555F56FE977B3cBc01704FECBF`](https://sepolia.mantlescan.xyz/address/0x1AFF98321D111A555F56FE977B3cBc01704FECBF) |
-| mYieldVault      | [`0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170`](https://sepolia.mantlescan.xyz/address/0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170) |
+| Contract          | Address                                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| IdentityRegistry  | [`0x58698a19006443eD2e9F1e4284Bd0c341B1a5A12`](https://sepolia.mantlescan.xyz/address/0x58698a19006443eD2e9F1e4284Bd0c341B1a5A12) |
+| ZkOracle          | [`0x3321FD3C919D4D935c09E7854F5b10ee15215577`](https://sepolia.mantlescan.xyz/address/0x3321FD3C919D4D935c09E7854F5b10ee15215577) |
+| ComplianceModule  | [`0x172717c3f37684Aabf4F9a07dB45c98251dcCb52`](https://sepolia.mantlescan.xyz/address/0x172717c3f37684Aabf4F9a07dB45c98251dcCb52) |
+| mUSDY (Mock USDY) | [`0x1AFF98321D111A555F56FE977B3cBc01704FECBF`](https://sepolia.mantlescan.xyz/address/0x1AFF98321D111A555F56FE977B3cBc01704FECBF) |
+| mYieldVault       | [`0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170`](https://sepolia.mantlescan.xyz/address/0xc7effA35eFFE2d1EaB90B3107927CaBeE4258170) |
 
 ## Documentation
 
