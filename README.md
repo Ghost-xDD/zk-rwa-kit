@@ -8,7 +8,8 @@ Privacy-preserving compliance for Real World Assets on Mantle.
 [Documentation](https://zk-rwa-kit-docs.vercel.app) · [Live Demo](https://zk-rwa-kit-yield.vercel.app) · [npm](https://www.npmjs.com/package/@zk-rwa-kit/client-sdk)
 
 [![npm](https://img.shields.io/npm/v/@zk-rwa-kit/client-sdk?style=flat-square&color=cb3837)](https://www.npmjs.com/package/@zk-rwa-kit/client-sdk)
-[![Mantle](https://img.shields.io/badge/chain-Mantle_Sepolia-65b3ae?style=flat-square)](https://sepolia.mantlescan.xyz)
+[![Mantle](https://img.shields.io/badge/Mantle-Sepolia-65b3ae?style=flat-square)](https://sepolia.mantlescan.xyz)
+[![TLSNotary](https://img.shields.io/badge/TLSNotary-MPC--TLS-8b5cf6?style=flat-square)](https://tlsnotary.org)
 [![MIT](https://img.shields.io/badge/license-MIT-f5a623?style=flat-square)](https://opensource.org/licenses/MIT)
 
 </div>
@@ -26,18 +27,19 @@ Privacy-preserving compliance for Real World Assets on Mantle.
 - [Architecture](#architecture)
 - [Local Development](#local-development)
 - [Deployments](#deployments)
+- [Security Model](#security-model)
 - [Documentation](#documentation)
 
 ---
 
 ## Overview
 
-Zk-RWA-Kit enables developers to build **privacy-preserving, compliance-gated Real World Asset (RWA)** workflows on Mantle. Users prove eligibility using TLSNotary MPC-TLS proofs without exposing sensitive credentials.
+Zk-RWA-Kit enables developers to build **privacy-preserving, compliance-gated Real World Asset (RWA)** workflows on Mantle. Users prove eligibility using [TLSNotary](https://tlsnotary.org/) MPC-TLS proofs without exposing sensitive credentials.
 
 **How it works:**
 
-1. User generates a TLSNotary proof in the browser (selective disclosure)
-2. Relayer verifies the proof and writes a time-bounded credential on-chain
+1. User generates a TLSNotary proof in-browser via **2-party MPC over TLS** (selective disclosure)
+2. Relayer verifies the cryptographic transcript and writes a time-bounded credential on-chain
 3. Compliant tokens and protocols check the credential before transfers
 
 ## Problem Statement
@@ -52,16 +54,24 @@ Zk-RWA-Kit enables developers to build **privacy-preserving, compliance-gated Re
 
 Zk-RWA-Kit creates a **compliant perimeter** where RWAs become DeFi-composable among eligible users and integrations — without a permanent public allowlist.
 
-It does **not** bypass compliance. Instead, verified claims become **expiring Session Credentials** (e.g., valid for 24 hours) that DeFi integrations check instead of permanent KYC flags.
+### Technical Approach
+
+We use **TLSNotary's MPC-TLS protocol** to generate verifiable proofs of web data:
+
+- **2-Party Computation (2PC):** The user's browser and a Notary server jointly compute the TLS session. Neither party alone can forge or tamper with the transcript.
+- **Selective Disclosure:** Users commit to the full TLS transcript but only reveal specific fields (e.g., `"eligible": true`) — the rest remains hidden via commitments.
+- **Garbled Circuits:** TLSNotary uses oblivious transfer and garbled circuits for the MPC, ensuring the Notary never sees plaintext request/response data.
+
+The verified claim becomes an **expiring Session Credential** (default: 24h TTL) written to the `IdentityRegistry` contract. DeFi integrations query this credential instead of permanent KYC flags — enabling composability without persistent identity linkage.
 
 ## Components
 
-| Component                                     | Description                                               |
-| --------------------------------------------- | --------------------------------------------------------- |
-| **[Client SDK](./packages/client-sdk)**       | TypeScript/WASM library for TLSNotary proof generation    |
-| **[Relayer](./packages/relayer)**             | Off-chain proof verification + on-chain credential writer |
-| **[Contracts](./packages/contracts)**         | IdentityRegistry, ZkOracle, compliance middleware         |
-| **[Prover Server](./services/prover-server)** | Rust TLSNotary notary service                             |
+| Component                                     | Description                                                                 |
+| --------------------------------------------- | --------------------------------------------------------------------------- |
+| **[Client SDK](./packages/client-sdk)**       | TypeScript + WASM bindings for in-browser MPC-TLS proof generation          |
+| **[Relayer](./packages/relayer)**             | Verifies TLSNotary transcripts, writes `SessionCredential` structs on-chain |
+| **[Contracts](./packages/contracts)**         | `IdentityRegistry`, `ZkOracle`, ERC-20/ERC-4626 compliance hooks            |
+| **[Prover Server](./services/prover-server)** | Rust Notary server — executes 2PC protocol with browser over WebSocket      |
 
 ## Quick Start
 
@@ -80,13 +90,14 @@ import {
   CLAIM_TYPES,
 } from '@zk-rwa-kit/client-sdk';
 
-// Generate proof
+// 1. Run MPC-TLS protocol → get signed transcript
 const { transcript } = await proveEligibility();
 
-// Submit → get on-chain credential (valid 24h)
+// 2. Submit transcript → Relayer verifies + writes credential on-chain
 const { txHash } = await submitProof(walletAddress, transcript, {
-  claimType: CLAIM_TYPES.ELIGIBLE,
+  claimType: CLAIM_TYPES.ELIGIBLE, // keccak256("ELIGIBLE")
 });
+// User now has SessionCredential valid for 24h
 ```
 
 > **Note:** Requires `SharedArrayBuffer`. See [browser setup](https://zk-rwa-kit-docs.vercel.app/getting-started/quick-start#browser-requirements).
@@ -117,26 +128,42 @@ const { txHash } = await submitProof(walletAddress, transcript, {
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                           USER'S BROWSER                             │
-│  ┌──────────────────────┐   ┌──────────────────────┐                │
-│  │ Your dApp             │──▶│ @zk-rwa-kit/sdk      │                │
-│  └──────────┬───────────┘   └──────────┬───────────┘                │
-│             │ WebSocket                │ HTTPS                       │
-└─────────────┼──────────────────────────┼────────────────────────────┘
-              │                          │
-              ▼                          ▼
-    ┌──────────────────┐        ┌──────────────────────┐
-    │ Prover Server     │        │ Relayer              │
-    │ (Rust, MPC-TLS)   │        │ (Node.js)            │
-    └──────────┬────────┘        └──────────┬───────────┘
-               │                            │
-               ▼                            ▼
-    ┌──────────────────┐        ┌──────────────────────────┐
-    │ Eligibility       │        │ Mantle Sepolia           │
-    │ Source (HTTPS)    │        │ IdentityRegistry + Vault │
-    └──────────────────┘        └──────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                              USER'S BROWSER                               │
+│  ┌────────────────────┐    ┌─────────────────────────────────────────┐   │
+│  │  Your dApp (React) │───▶│  @zk-rwa-kit/client-sdk                 │   │
+│  └────────────────────┘    │  ├─ tlsn-wasm (Rust→WASM)               │   │
+│                            │  ├─ WebSocket MPC session               │   │
+│                            │  └─ Transcript serialization            │   │
+│                            └──────────────┬──────────────────────────┘   │
+│                                           │                              │
+└───────────────────────────────────────────┼──────────────────────────────┘
+                    ┌───────────────────────┴───────────────────────┐
+                    │                                               │
+                    ▼ WebSocket (2PC Protocol)                      ▼ HTTPS POST
+         ┌─────────────────────────┐                    ┌────────────────────────┐
+         │  Prover Server (Rust)   │                    │  Relayer (Node.js)     │
+         │  ├─ TLSNotary Notary    │                    │  ├─ Transcript verify  │
+         │  ├─ Garbled circuits    │                    │  ├─ Claim extraction   │
+         │  └─ Oblivious transfer  │                    │  └─ On-chain write     │
+         └────────────┬────────────┘                    └───────────┬────────────┘
+                      │ TLS 1.2/1.3                                 │ eth_sendRawTx
+                      ▼                                             ▼
+         ┌─────────────────────────┐                    ┌────────────────────────┐
+         │  Eligibility Source     │                    │  Mantle Sepolia        │
+         │  (Bank API / KYC)       │                    │  ├─ IdentityRegistry   │
+         │                         │                    │  ├─ ZkOracle           │
+         │  {"eligible": true}     │                    │  └─ mYieldVault        │
+         └─────────────────────────┘                    └────────────────────────┘
 ```
+
+**Data Flow:**
+
+1. Browser initiates 2PC with Notary over WebSocket
+2. MPC computes TLS handshake — Notary never sees plaintext
+3. Browser fetches eligibility data, Notary co-signs transcript
+4. SDK extracts claim, sends to Relayer for verification
+5. Relayer writes `SessionCredential(wallet, claimType, expiry)` to `IdentityRegistry`
 
 ## Local Development
 
@@ -211,11 +238,17 @@ Full documentation at **[zk-rwa-kit-docs.vercel.app](https://zk-rwa-kit-docs.ver
 - [Smart Contracts](https://zk-rwa-kit-docs.vercel.app/contracts/overview)
 - [Architecture](https://zk-rwa-kit-docs.vercel.app/getting-started/architecture)
 
-## Security
+## Security Model
 
-- Relayer is trusted in the MVP (off-chain verification)
-- Session credentials auto-expire after 24 hours
-- Never commit private keys
+| Property                 | Status                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| **Notary trust**         | Semi-trusted — cannot forge proofs, but can collude to learn plaintext (mitigated by TEEs) |
+| **Relayer trust**        | Trusted in MVP — verifies proofs off-chain; production path → on-chain ZK verification     |
+| **Credential expiry**    | 24h TTL enforced on-chain via `block.timestamp` checks                                     |
+| **Selective disclosure** | Only committed fields are revealed; full transcript remains hidden                         |
+| **Replay protection**    | Nonce + wallet binding in transcript prevents credential reuse                             |
+
+> **Note:** Never commit private keys. Use environment variables for all secrets.
 
 ---
 
