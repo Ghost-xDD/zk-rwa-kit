@@ -4,8 +4,8 @@ FROM rust:1.90 AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy the Cargo.toml and Cargo.lock files
-COPY services/prover-server/Cargo.toml services/prover-server/Cargo.lock ./
+# Copy the Cargo.toml file (Cargo.lock may not be in the build context)
+COPY services/prover-server/Cargo.toml ./
 
 # Create a dummy main.rs to cache dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs
