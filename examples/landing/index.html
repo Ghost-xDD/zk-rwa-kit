@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zk-RWA-Kit — Privacy-Preserving RWA Compliance for Mantle</title>
+    <meta
+      name="description"
+      content="Zk-RWA-Kit: Just-in-time, privacy-preserving compliance for Real World Assets on Mantle. Session credentials, not permanent allowlists."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="nav">
+        <div class="logo">
+          <span class="logo-glyph">⬡</span>
+          <span>Zk-RWA-Kit</span>
+          <span class="logo-tag">Mantle</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#problem">Problem</a>
+          <a href="#solution">Solution</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#examples">Examples</a>
+        </nav>
+        <a
+          class="nav-cta"
+          href="https://github.com"
+          target="_blank"
+          rel="noreferrer"
+          >View on GitHub</a
+        >
+      </header>
+
+      <main>
+        <!-- HERO -->
+        <section class="hero">
+          <div class="hero-content">
+            <p class="hero-badge">Infrastructure SDK for Mantle</p>
+            <h1>
+              RWAs that are<br />
+              <span class="gradient-text">DeFi-composable</span><br />
+              without doxxing users.
+            </h1>
+            <p class="hero-sub">
+              Zk-RWA-Kit converts private eligibility proofs into
+              <strong>temporary on-chain session credentials</strong> — so
+              compliant assets can move freely among verified participants,
+              without a permanent public allowlist.
+            </p>
+            <div class="hero-actions">
+              <a class="btn-primary" href="#examples">Try the demos</a>
+              <a class="btn-outline" href="#solution">Learn how it works</a>
+            </div>
+          </div>
+          <aside class="hero-aside">
+            <div class="credential-card">
+              <div class="credential-header">
+                <span class="credential-icon">✓</span>
+                <span>Session Credential</span>
+              </div>
+              <div class="credential-body">
+                <div class="credential-row">
+                  <span class="label">Claim</span>
+                  <span class="value">ELIGIBLE</span>
+                </div>
+                <div class="credential-row">
+                  <span class="label">Wallet</span>
+                  <span class="value mono">0x7a3f…9c21</span>
+                </div>
+                <div class="credential-row">
+                  <span class="label">Valid until</span>
+                  <span class="value highlight">24 hours</span>
+                </div>
+              </div>
+              <div class="credential-footer">
+                <span class="pulse"></span>
+                <span>On-chain · Mantle Sepolia</span>
+              </div>
+            </div>
+            <p class="hero-aside-note">
+              No permanent KYC flag. No doxxing. Just-in-time compliance.
+            </p>
+          </aside>
+        </section>
+
+        <!-- PROBLEM -->
+        <section id="problem" class="section">
+          <div class="section-intro">
+            <span class="section-label">The Problem</span>
+            <h2>
+              RWAs today force a bad trade-off:<br />
+              <span class="muted">privacy or composability — pick one.</span>
+            </h2>
+          </div>
+          <div class="pain-grid">
+            <article class="pain-card">
+              <div class="pain-icon">👤</div>
+              <h3>Users lose privacy</h3>
+              <p>
+                To access compliant RWA yield (like USDY), users must link their
+                main wallet to a centralized KYC flow — permanently doxxing
+                their on-chain history.
+              </p>
+            </article>
+            <article class="pain-card">
+              <div class="pain-icon">🔧</div>
+              <h3>Developers hit dead ends</h3>
+              <p>
+                Permissioned tokens (ERC-3643-style) break standard DeFi.
+                Transfers fail because AMMs, lending pools, and users aren't on
+                the allowlist. Implementing this correctly is complex.
+              </p>
+            </article>
+            <article class="pain-card">
+              <div class="pain-icon">🧩</div>
+              <h3>Ecosystems lack tooling</h3>
+              <p>
+                Mantle is pushing RWAs and privacy, but developers still lack a
+                <strong>plug-and-play toolkit</strong> that turns private proofs
+                into composable compliance.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="solution" class="section">
+          <div class="section-intro">
+            <span class="section-label">The Solution</span>
+            <h2>
+              Just-in-time compliance.<br />
+              <span class="gradient-text">Not permanent allowlists.</span>
+            </h2>
+            <p class="section-desc">
+              Zk-RWA-Kit is an infrastructure SDK that lets developers add
+              <strong>privacy-preserving, just-in-time compliance</strong> to
+              RWA workflows on Mantle. It doesn't bypass compliance — it creates
+              a <strong>compliant perimeter</strong> where RWAs become
+              DeFi-composable among eligible users and contracts.
+            </p>
+          </div>
+
+          <div class="kit-grid">
+            <article class="kit-card">
+              <div class="kit-number">A</div>
+              <h3>Client-Side Prover</h3>
+              <p class="kit-tech">TypeScript + WASM</p>
+              <p>
+                A browser library using
+                <strong>TLSNotary MPC-TLS proofs</strong> to generate
+                <em>selective-disclosure</em> eligibility proofs from an HTTPS
+                session. Users prove a condition is true (e.g. "KYC verified",
+                "not sanctioned") without revealing their full identity.
+              </p>
+              <div class="kit-api">
+                <code
+                  >proveEligibility(providerUrl, claimSpec) → ProofPayload</code
+                >
+              </div>
+            </article>
+            <article class="kit-card">
+              <div class="kit-number">B</div>
+              <h3>Session Credentials</h3>
+              <p class="kit-tech">Solidity + Relayer</p>
+              <p>
+                Proofs are verified off-chain by a relayer, which issues
+                <strong>short-lived on-chain credentials</strong>. Instead of
+                "wallet is forever KYC'd," users get:
+              </p>
+              <ul class="kit-list">
+                <li><strong>Privacy:</strong> no permanent public flag</li>
+                <li><strong>UX:</strong> no repeated KYC per interaction</li>
+                <li><strong>Control:</strong> clear expiry and revocation</li>
+              </ul>
+              <div class="kit-api">
+                <code>validUntil[user][claimType] = now + 24h</code>
+              </div>
+            </article>
+            <article class="kit-card">
+              <div class="kit-number">C</div>
+              <h3>Compliant Perimeter</h3>
+              <p class="kit-tech">Token Wrappers + Middleware</p>
+              <p>
+                Tokens and protocols check the session credential before
+                transfers. This makes RWAs
+                <strong>DeFi-compatible inside a verified set</strong> of
+                participants — vaults, AMMs, lending pools can all work
+                correctly for eligible users.
+              </p>
+              <div class="kit-api">
+                <code>SessionPass.isValid(user, ELIGIBLE) → bool</code>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="how-it-works" class="section">
+          <div class="section-intro">
+            <span class="section-label">How It Works</span>
+            <h2>Private proof → Session credential → Composable compliance</h2>
+          </div>
+          <div class="flow">
+            <div class="flow-step">
+              <div class="flow-num">1</div>
+              <div class="flow-content">
+                <h4>Generate proof</h4>
+                <p>
+                  User authenticates to a trusted eligibility source. The SDK
+                  splits session keys via MPC, then generates a cryptographic
+                  proof that the disclosed fields satisfy a compliance rule —
+                  without revealing the full identity.
+                </p>
+              </div>
+            </div>
+            <div class="flow-connector"></div>
+            <div class="flow-step">
+              <div class="flow-num">2</div>
+              <div class="flow-content">
+                <h4>Verify + issue credential</h4>
+                <p>
+                  The relayer verifies the proof off-chain and writes an
+                  <strong>expiring SessionCredential</strong> on Mantle. This is
+                  the bridge from "private proof" to "on-chain compliance
+                  state."
+                </p>
+              </div>
+            </div>
+            <div class="flow-connector"></div>
+            <div class="flow-step">
+              <div class="flow-num">3</div>
+              <div class="flow-content">
+                <h4>Interact within the perimeter</h4>
+                <p>
+                  Compliant tokens and DeFi integrations check the credential.
+                  Transfers, deposits, and withdrawals succeed — but only for
+                  verified participants. The asset stays composable inside the
+                  perimeter.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- USER STORIES -->
+        <section class="section stories-section">
+          <div class="stories-grid">
+            <article class="story-card">
+              <span class="story-label">User story</span>
+              <h3>Privacy-first RWA access</h3>
+              <p>
+                "I want to access a USDY-like yield token on Mantle
+                <strong>without permanently doxxing my wallet</strong>. I
+                generate a privacy-preserving eligibility proof and receive a
+                24-hour Compliance Pass. I can then interact with compliant DeFi
+                integrations during that session."
+              </p>
+            </article>
+            <article class="story-card">
+              <span class="story-label">Developer story</span>
+              <h3>Plug-and-play compliance</h3>
+              <p>
+                "I want to build a compliant DeFi app on Mantle
+                <strong>without building custom allowlists</strong> and
+                edge-case transfer logic. I install Zk-RWA-Kit, use the
+                compliance middleware, and my app automatically enforces
+                eligibility via Session Credentials."
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <!-- EXAMPLES -->
+        <section id="examples" class="section examples-section">
+          <div class="section-intro centered">
+            <span class="section-label">Live Demos</span>
+            <h2>See the SDK in action</h2>
+            <p class="section-desc">
+              Two reference dApps showing the full flow: connect wallet →
+              generate proof → receive credential → interact within the
+              compliant perimeter.
+            </p>
+          </div>
+          <div class="demo-grid">
+            <a
+              class="demo-card"
+              href="https://zk-rwa-kit-token.vercel.app"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <div class="demo-preview">
+                <div class="demo-browser">
+                  <div class="browser-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <div class="browser-url">zk-rwa-kit-token.vercel.app</div>
+                </div>
+                <div class="demo-visual demo-visual-token">
+                  <div class="demo-mock-ui">
+                    <div class="mock-badge">Token Transfer</div>
+                    <div class="mock-flow">
+                      <span class="mock-step done">✓ Connected</span>
+                      <span class="mock-arrow">→</span>
+                      <span class="mock-step done">✓ Proved</span>
+                      <span class="mock-arrow">→</span>
+                      <span class="mock-step active">Transfer</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="demo-info">
+                <div class="demo-header">
+                  <span class="demo-icon">↔</span>
+                  <h3>Token Transfer Demo</h3>
+                </div>
+                <p>
+                  Prove eligibility and move a permissioned RWA token. Without a
+                  valid session credential, the transfer is blocked.
+                </p>
+                <span class="demo-cta">Launch demo →</span>
+              </div>
+            </a>
+            <a
+              class="demo-card"
+              href="https://zk-rwa-kit-yield.vercel.app/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <div class="demo-preview">
+                <div class="demo-browser">
+                  <div class="browser-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <div class="browser-url">zk-rwa-kit-yield.vercel.app</div>
+                </div>
+                <div class="demo-visual demo-visual-vault">
+                  <div class="demo-mock-ui">
+                    <div class="mock-badge">Yield Vault</div>
+                    <div class="mock-vault">
+                      <div class="mock-stat">
+                        <span class="stat-label">TVL</span>
+                        <span class="stat-value">$12.4K</span>
+                      </div>
+                      <div class="mock-stat">
+                        <span class="stat-label">APY</span>
+                        <span class="stat-value highlight">5.0%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="demo-info">
+                <div class="demo-header">
+                  <span class="demo-icon">⬡</span>
+                  <h3>Mantle Yield Vault</h3>
+                </div>
+                <p>
+                  Deposit mUSDY into a compliant ERC-4626 vault. Only verified
+                  users can deposit and withdraw.
+                </p>
+                <span class="demo-cta">Launch demo →</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta">
+          <div class="cta-content">
+            <h2>Start building compliant RWA experiences</h2>
+            <p>
+              One SDK. Private proofs. Temporary credentials. DeFi-ready
+              compliance on Mantle.
+            </p>
+          </div>
+          <div class="cta-actions">
+            <a class="btn-primary" href="#examples">Try the demos</a>
+            <a
+              class="btn-outline"
+              href="https://github.com"
+              target="_blank"
+              rel="noreferrer"
+              >Read the docs</a
+            >
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-brand">
+          <span class="logo-glyph">⬡</span>
+          <span>Zk-RWA-Kit</span>
+        </div>
+        <p>
+          Built for the Mantle Global Hackathon 2025.<br />
+          Privacy-preserving, just-in-time compliance for Real World Assets.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
