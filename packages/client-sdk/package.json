@@ -1,6 +1,6 @@
 {
   "name": "@zk-rwa-kit/client-sdk",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Client SDK for Zk-RWA-Kit: TLS proof generation and submission",
   "license": "MIT",
   "main": "dist/index.js",
@@ -17,7 +17,9 @@
     }
   },
   "files": [
-    "dist/"
+    "dist/",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",

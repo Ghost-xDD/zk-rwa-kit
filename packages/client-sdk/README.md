@@ -1,6 +1,8 @@
 # @zk-rwa-kit/client-sdk
 
-Client SDK for Zk-RWA-Kit - privacy-preserving RWA compliance verification.
+Client SDK for Zk-RWA-Kit. Generate TLSNotary proofs in the browser, extract
+selective disclosure claims, and submit proofs to a relayer for on-chain
+SessionCredentials.
 
 ## Installation
 
@@ -10,119 +12,152 @@ npm install @zk-rwa-kit/client-sdk
 pnpm add @zk-rwa-kit/client-sdk
 ```
 
-## Usage
+## Quick Start
 
-### Basic Flow
-
-```typescript
-import { 
-  proveEligibility, 
+```ts
+import {
+  CLAIM_TYPES,
+  DEFAULT_PROVER_URL,
+  DEFAULT_RELAYER_URL,
+  proveEligibility,
   submitProof,
-  waitForConfirmation 
+  waitForConfirmation,
 } from '@zk-rwa-kit/client-sdk';
 
-// 1. Generate TLS proof
-const proveResult = await proveEligibility({
-  proverUrl: 'wss://localhost/prove',
+// 1) Generate TLS proof (browser-only)
+const prove = await proveEligibility({
+  proverUrl: DEFAULT_PROVER_URL,
 });
+if (!prove.success || !prove.transcript) throw new Error(prove.error);
 
-if (!proveResult.success) {
-  throw new Error(proveResult.error);
-}
-
-// 2. Submit to relayer
-const submitResult = await submitProof(
+// 2) Submit proof to relayer
+const submit = await submitProof(
   '0x1234567890123456789012345678901234567890',
-  proveResult.transcript!,
-  { claimType: 'ELIGIBLE' }
+  prove.transcript,
+  { relayerUrl: DEFAULT_RELAYER_URL, claimType: CLAIM_TYPES.ELIGIBLE }
 );
+if (!submit.success) throw new Error(submit.error);
 
-if (!submitResult.success) {
-  throw new Error(submitResult.error);
-}
-
-console.log('Transaction:', submitResult.txHash);
-
-// 3. Wait for confirmation
-const confirmation = await waitForConfirmation(submitResult.txHash!);
-console.log('Status:', confirmation.status);
-```
-
-### Demo Mode
-
-For reliable demonstrations, use demo mode:
-
-```typescript
-const result = await proveEligibility({
-  demoMode: true, // Uses cached proof
+// 3) Wait for tx confirmation
+const confirmation = await waitForConfirmation(submit.txHash!, {
+  relayerUrl: DEFAULT_RELAYER_URL,
 });
+console.log('status:', confirmation.status);
 ```
 
-### Extract Claims from Transcript
+## Browser Requirements (Important)
 
-```typescript
-import { extractClaims, transcriptToString } from '@zk-rwa-kit/client-sdk';
+TLSNotary WASM uses `SharedArrayBuffer`. Your app must be served with COOP/COEP:
 
-// Convert transcript to readable string
-const { received } = transcriptToString(transcript);
-
-// Extract all claims
-const claims = extractClaims(received);
-console.log('Eligible:', claims.eligible);
-console.log('Accredited:', claims.accredited);
-console.log('KYC Verified:', claims.kycVerified);
 ```
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+```
+
+If you deploy on Vercel, add these headers (see `examples/*/vercel.json`).
+
+## Default Endpoints
+
+Defaults are configured for Railway deployments:
+
+- `DEFAULT_PROVER_URL`: `wss://zk-rwa-prover-production.up.railway.app/prove`
+- `DEFAULT_RELAYER_URL`: `https://zk-rwa-kitrelayer-production.up.railway.app`
+
+Override them via options if you use local services.
 
 ## API Reference
 
 ### `proveEligibility(options)`
 
-Generate a TLS proof of eligibility.
+Generates a TLS proof of eligibility in the browser.
 
 **Options:**
-- `proverUrl` - WebSocket URL of prover server (default: `wss://localhost/prove`)
-- `maxSentData` - Max bytes to send (default: 512)
-- `maxRecvData` - Max bytes to receive (default: 2048)
-- `timeout` - Timeout in ms (default: 120000)
+
+- `proverUrl` - WebSocket URL (default: `DEFAULT_PROVER_URL`)
+- `maxSentData` - Max bytes sent to server (default: `MAX_SENT_DATA`)
+- `maxRecvData` - Max bytes received from server (default: `MAX_RECV_DATA`)
+- `timeout` - Milliseconds (default: 120000)
 - `demoMode` - Use cached proof (default: false)
 
 **Returns:** `ProveResult`
 
 ### `submitProof(walletAddress, transcript, options)`
 
-Submit proof to relayer for on-chain registration.
+Submits the proof to the relayer for verification and on-chain credential.
 
 **Options:**
-- `relayerUrl` - Relayer API URL (default: `http://localhost:3001`)
-- `claimType` - Claim type (default: `ELIGIBLE`)
-- `extractedValue` - Override extracted value
+
+- `relayerUrl` - Relayer base URL (default: `DEFAULT_RELAYER_URL`)
+- `claimType` - Claim type (default: `CLAIM_TYPES.ELIGIBLE`)
+- `extractedValue` - Optional override for extracted value
 - `timeout` - Request timeout in ms
 
 **Returns:** `SubmitResult`
 
-### `checkTransactionStatus(txHash, relayerUrl)`
+### `checkTransactionStatus(txHash, relayerUrl?)`
 
-Check status of a submitted transaction.
+Returns `PENDING | CONFIRMED | FAILED` and any error info.
 
-### `waitForConfirmation(txHash, options)`
+### `waitForConfirmation(txHash, options?)`
 
-Wait for transaction confirmation.
+Polls the relayer until confirmation or timeout.
+
+### Transcript Utilities
+
+```ts
+import {
+  transcriptToString,
+  extractClaims,
+  extractField,
+  parseJsonFromTranscript,
+} from '@zk-rwa-kit/client-sdk';
+
+const { received } = transcriptToString(transcript);
+const claims = extractClaims(received);
+const bankName = extractField(received, 'bank_name');
+const json = parseJsonFromTranscript(received);
+```
 
 ## Constants
 
-```typescript
-import { 
+```ts
+import {
   MANTLE_SEPOLIA_CONFIG,
   CLAIM_TYPES,
   DEFAULT_PROVER_URL,
-  DEFAULT_RELAYER_URL 
+  DEFAULT_RELAYER_URL,
+  MAX_SENT_DATA,
+  MAX_RECV_DATA,
 } from '@zk-rwa-kit/client-sdk';
 ```
 
-## Requirements
+## Types
 
-- Browser with SharedArrayBuffer support (requires COOP/COEP headers)
-- For server-side: Node.js 18+
+```ts
+import type {
+  ProveOptions,
+  ProveResult,
+  SubmitOptions,
+  SubmitResult,
+  VerifiedTranscript,
+} from '@zk-rwa-kit/client-sdk';
+```
+
+## Troubleshooting
+
+### WebSocket fails to connect
+
+- Ensure the prover URL is `wss://` in production.
+- Make sure COOP/COEP headers are set.
+- Check that the prover exposes `/prove` and your host allows WebSocket.
+
+### Relayer says "token missing"
+
+- Set `RWA_TOKEN_ADDRESS` (mUSDY) in the relayer environment.
+
+### "Transfer not compliant"
+
+- Make sure the recipient has an on-chain SessionCredential.
 
 ## License
 
