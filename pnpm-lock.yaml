@@ -30,7 +30,7 @@ importers:
         specifier: ^6.7.1
         version: 6.7.2
       '@zk-rwa-kit/client-sdk':
-        specifier: workspace:*
+        specifier: ^0.1.0
         version: link:../../packages/client-sdk
       buffer:
         specifier: ^6.0.3
@@ -151,7 +151,7 @@ importers:
         specifier: ^6.7.1
         version: 6.7.2
       '@zk-rwa-kit/client-sdk':
-        specifier: workspace:*
+        specifier: ^0.1.0
         version: link:../../packages/client-sdk
       buffer:
         specifier: ^6.0.3
