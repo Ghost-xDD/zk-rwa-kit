@@ -13,12 +13,14 @@ export const MANTLE_SEPOLIA_CONFIG: ChainConfig = {
 /**
  * Default prover WebSocket URL
  */
-export const DEFAULT_PROVER_URL = 'wss://localhost/prove';
+export const DEFAULT_PROVER_URL =
+  'wss://zk-rwa-prover-production.up.railway.app/prove';
 
 /**
  * Default relayer API URL
  */
-export const DEFAULT_RELAYER_URL = 'http://localhost:3001';
+export const DEFAULT_RELAYER_URL =
+  'https://zk-rwa-kitrelayer-production.up.railway.app';
 
 /**
  * Claim type constants

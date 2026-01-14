@@ -165,10 +165,12 @@ var options = {
     }),
     new webpack.DefinePlugin({
       'process.env.PROVER_PROXY_URL': JSON.stringify(
-        process.env.PROVER_PROXY_URL || 'ws://localhost:9816/prove'
+        process.env.PROVER_PROXY_URL ||
+          'wss://zk-rwa-prover-production.up.railway.app/prove'
       ),
       'process.env.RELAYER_URL': JSON.stringify(
-        process.env.RELAYER_URL || 'http://localhost:3001'
+        process.env.RELAYER_URL ||
+          'https://zk-rwa-kitrelayer-production.up.railway.app'
       ),
       'process.env.CHAIN_EXPLORER_URL': JSON.stringify(
         process.env.CHAIN_EXPLORER_URL || 'https://sepolia.mantlescan.xyz'
