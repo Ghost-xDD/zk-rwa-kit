@@ -840,7 +840,7 @@ main {
   }
 
   .demo-card {
-    max-width: 480px;
+    max-width: 520px;
   }
 }
 
@@ -848,30 +848,171 @@ main {
   .nav {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 14px;
   }
 
   .nav-links {
     margin-left: 0;
     flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .nav-cta {
+    width: 100%;
+    text-align: center;
   }
 
   .page {
-    padding: 24px 5vw 40px;
+    padding: 20px 5vw 36px;
   }
 
   .hero {
-    margin-top: 40px;
+    margin-top: 36px;
+    gap: 32px;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions .btn-primary,
+  .hero-actions .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-aside {
+    max-width: 100%;
+  }
+
+  .credential-card {
+    padding: 18px;
   }
 
   .section {
-    margin-top: 72px;
+    margin-top: 64px;
+  }
+
+  .section-intro h2 {
+    font-size: 1.5rem;
+  }
+
+  .pain-grid {
+    gap: 14px;
+  }
+
+  .pain-card {
+    padding: 20px;
+  }
+
+  .kit-grid {
+    gap: 14px;
+  }
+
+  .kit-card {
+    padding: 20px;
+  }
+
+  .flow-step {
+    grid-template-columns: 40px 1fr;
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .flow-num {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .flow-connector {
+    margin-left: 39px;
+    height: 18px;
+  }
+
+  .stories-section {
+    margin-top: 64px;
+  }
+
+  .stories-grid {
+    gap: 14px;
+  }
+
+  .story-card {
+    padding: 22px;
+  }
+
+  .demo-grid {
+    margin-top: 32px;
+    gap: 20px;
+  }
+
+  .demo-card {
+    max-width: 100%;
+  }
+
+  .demo-visual {
+    height: auto;
+    min-height: 140px;
+    padding: 20px 16px;
+  }
+
+  .mock-flow {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .mock-step {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .mock-arrow {
+    display: none;
+  }
+
+  .mock-vault {
+    gap: 24px;
+  }
+
+  .demo-info {
+    padding: 20px;
+  }
+
+  .demo-header {
+    gap: 10px;
+  }
+
+  .demo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .demo-info h3 {
+    font-size: 1.1rem;
   }
 
   .cta {
-    padding: 28px;
+    margin-top: 64px;
+    padding: 24px;
     flex-direction: column;
     align-items: flex-start;
+    gap: 20px;
+  }
+
+  .cta-content h2 {
+    font-size: 1.3rem;
   }
 
   .cta-actions {
@@ -886,7 +1027,173 @@ main {
   }
 
   .footer {
+    margin-top: 56px;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 16px 4vw 28px;
+  }
+
+  .logo {
+    font-size: 0.95rem;
+  }
+
+  .logo-glyph {
+    font-size: 1.1rem;
+  }
+
+  .logo-tag {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+  }
+
+  .nav-links {
+    gap: 10px;
+    font-size: 0.85rem;
+  }
+
+  .hero {
+    margin-top: 28px;
+  }
+
+  .hero-badge {
+    font-size: 0.7rem;
+    padding: 5px 12px;
+  }
+
+  .hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .hero-sub {
+    font-size: 0.95rem;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+
+  .credential-card {
+    padding: 16px;
+  }
+
+  .credential-header {
+    font-size: 0.9rem;
+  }
+
+  .credential-row {
+    font-size: 0.85rem;
+  }
+
+  .section {
+    margin-top: 52px;
+  }
+
+  .section-label {
+    font-size: 0.68rem;
+  }
+
+  .section-intro h2 {
+    font-size: 1.35rem;
+  }
+
+  .section-desc {
+    font-size: 0.95rem;
+  }
+
+  .pain-card,
+  .kit-card,
+  .story-card {
+    padding: 18px;
+  }
+
+  .pain-icon {
+    font-size: 1.4rem;
+  }
+
+  .pain-card h3,
+  .kit-card h3,
+  .story-card h3 {
+    font-size: 1rem;
+  }
+
+  .pain-card p,
+  .kit-card > p,
+  .story-card p {
+    font-size: 0.9rem;
+  }
+
+  .kit-api {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+
+  .flow-step {
+    padding: 16px;
+  }
+
+  .flow-content h4 {
+    font-size: 1rem;
+  }
+
+  .flow-content p {
+    font-size: 0.9rem;
+  }
+
+  .demo-visual {
+    min-height: 120px;
+    padding: 16px 12px;
+  }
+
+  .mock-badge {
+    font-size: 0.68rem;
+    padding: 5px 12px;
+  }
+
+  .mock-step {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+  }
+
+  .stat-value {
+    font-size: 1.2rem;
+  }
+
+  .demo-info {
+    padding: 16px;
+  }
+
+  .demo-info p {
+    font-size: 0.88rem;
+  }
+
+  .demo-cta {
+    font-size: 0.88rem;
+  }
+
+  .cta {
+    padding: 20px;
+  }
+
+  .cta-content h2 {
+    font-size: 1.15rem;
+  }
+
+  .cta-content p {
+    font-size: 0.9rem;
+  }
+
+  .footer p {
+    font-size: 0.82rem;
   }
 }
