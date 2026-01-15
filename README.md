@@ -22,6 +22,7 @@ Privacy-preserving compliance for Real World Assets on Mantle.
 - [Problem Statement](#problem-statement)
 - [Solution](#solution)
 - [Components](#components)
+  - [Core Architecture](#core-architecture)
 - [Quick Start](#quick-start)
 - [SDK Reference](#sdk-reference)
 - [Architecture](#architecture)
@@ -72,6 +73,52 @@ The verified claim becomes an **expiring Session Credential** (default: 24h TTL)
 | **[Relayer](./packages/relayer)**             | Verifies TLSNotary transcripts, writes `SessionCredential` structs on-chain |
 | **[Contracts](./packages/contracts)**         | `IdentityRegistry`, `ZkOracle`, ERC-20/ERC-4626 compliance hooks            |
 | **[Prover Server](./services/prover-server)** | Rust Notary server — executes 2PC protocol with browser over WebSocket      |
+
+### Core Architecture
+
+#### A) Client-Side Prover SDK (TypeScript/WASM)
+
+A browser library that uses **TLSNotary-style MPC-TLS proofs** to generate **selective-disclosure eligibility proofs** from an HTTPS session.
+
+* A user logs into a trusted "identity/eligibility source" (for demo reliability this is a controlled mock provider; later it can be a KYC portal or regulated provider).
+* The prover generates a cryptographic proof that a specific condition is true (e.g., "country is not sanctioned", "KYC status is verified", "balance above threshold").
+* The proof reveals only the minimum required fields—**not** the user's full identity, session cookies, or raw transcript.
+
+**Developer interface goal:** one function call like:
+`proveEligibility(providerUrl, claimSpec) -> ProofPayload`
+
+#### B) Compliance Middleware on Mantle (Session Credentials)
+
+A set of Solidity contracts that turn verified proofs into **temporary compliance credentials** rather than permanent public allowlists.
+
+Instead of "wallet is forever KYC'd," Zk-RWA-Kit implements **Just-in-Time compliance**:
+
+* Proof is verified (MVP: off-chain via relayer; future: on-chain ZK verification).
+* If valid, the system issues a **Session Credential** (either an expiring SBT or an expiring on-chain record):
+  `validUntil[user][claimType] = now + 24h`
+
+These session credentials are what DeFi integrations check. They give:
+
+* **privacy:** no permanent public KYC flag
+* **UX:** no repeated KYC per interaction
+* **control:** clear expiry and revocation patterns
+
+#### C) "Compliant Perimeter" Token/Wrapper + Factory
+
+A wrapper or token implementation that enforces compliance checks at transfer time—without forcing every app developer to reinvent compliance logic.
+
+For the hackathon MVP, the kit includes:
+
+* a **USDY-like permissioned mock asset** (to simulate transfer restrictions)
+* a **zkUSDY-like demo wrapper token** (clearly labeled demo / not affiliated)
+
+The wrapper's key behavior is:
+
+* **Transfers are allowed only if the sender and receiver have a valid Session Credential** (and optionally if the receiving contract is also registered/approved as an eligible integration).
+* This makes the asset **composable within a compliant perimeter**—so you can build lending pools, vaults, or AMMs designed for compliant participants, without leaking identities.
+
+**Important framing:**
+This does *not* claim to make restricted assets "free-trading." It makes them **DeFi-compatible inside a verified set of participants and integrations**.
 
 ## Quick Start
 

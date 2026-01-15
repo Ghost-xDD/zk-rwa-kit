@@ -112,6 +112,8 @@ function App(): ReactElement {
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [vaultTab, setVaultTab] = useState<'deposit' | 'withdraw'>('deposit');
   const [devConsoleOpen, setDevConsoleOpen] = useState(false);
+  const [proofStatus, setProofStatus] = useState<string | null>(null);
+  const [txStatus, setTxStatus] = useState<string | null>(null);
 
   const stepIndex = useMemo(() => {
     const steps = ['connect', 'prove', 'submit', 'done', 'vault'] as const;
@@ -275,6 +277,7 @@ function App(): ReactElement {
   const generateProof = useCallback(async () => {
     setProcessing(true);
     setError(null);
+    setProofStatus('Initializing secure connection...');
     console.log('🎬 Starting eligibility verification...');
 
     let verifier: TVerifier;
@@ -283,13 +286,16 @@ function App(): ReactElement {
         max_sent_data: MAX_SENT_DATA,
         max_recv_data: MAX_RECV_DATA,
       });
+      setProofStatus('Connecting to secure server...');
       await verifier.connect(proverProxyUrl);
       console.log('✅ Connected to prover');
 
+      setProofStatus('Securely fetching eligibility data...');
       await new Promise((r) => setTimeout(r, 1000));
       const result = await verifier.verify();
       console.log('✅ Verification completed!');
 
+      setProofStatus('Generating cryptographic proof...');
       const sent = result.transcript?.sent || [];
       const recv = result.transcript?.recv || [];
       const serverName = result.server_name || 'unknown';
@@ -301,6 +307,7 @@ function App(): ReactElement {
       if (!isEligible) {
         setError('Could not verify eligibility');
         setProcessing(false);
+        setProofStatus(null);
         return;
       }
 
@@ -316,9 +323,11 @@ function App(): ReactElement {
       setVerifiedData({ transcript, eligible: isEligible });
       setStep('submit');
       setProcessing(false);
+      setProofStatus(null);
     } catch (e: any) {
       setError(`Verification failed: ${e.message}`);
       setProcessing(false);
+      setProofStatus(null);
     }
   }, []);
 
@@ -396,6 +405,7 @@ function App(): ReactElement {
     setProcessing(true);
     setActionError(null);
     setActionSuccess(null);
+    setTxStatus('Checking token allowance...');
     console.log(`🏦 Depositing ${depositAmount} mUSDY into vault...`);
 
     try {
@@ -413,20 +423,25 @@ function App(): ReactElement {
         MYIELD_VAULT_ADDRESS
       );
       if (allowance < amount) {
+        setTxStatus('Requesting token approval...');
         console.log('📝 Approving vault...');
         const approveTx = await mUSDY.approve(MYIELD_VAULT_ADDRESS, amount);
+        setTxStatus('Confirming approval transaction...');
         await approveTx.wait();
         console.log('✅ Approved');
       }
 
+      setTxStatus('Initiating deposit transaction...');
       const tx = await vault.deposit(amount, walletAddress);
       console.log(`📝 Deposit TX: ${tx.hash}`);
+      setTxStatus('Confirming deposit on blockchain...');
       await tx.wait();
 
       setActionSuccess(
         `🎉 Deposited ${depositAmount} mUSDY! You received mYV shares.`
       );
       setShowConfetti(true);
+      setTxStatus(null);
       await refreshData(walletAddress, provider);
     } catch (e: any) {
       let errorMsg = e.message || 'Deposit failed';
@@ -435,6 +450,7 @@ function App(): ReactElement {
           '❌ You need a valid SessionCredential! Prove eligibility first.';
       }
       setActionError(errorMsg);
+      setTxStatus(null);
     }
 
     setProcessing(false);
@@ -446,6 +462,7 @@ function App(): ReactElement {
     setProcessing(true);
     setActionError(null);
     setActionSuccess(null);
+    setTxStatus('Initiating withdrawal transaction...');
     console.log(`🏦 Withdrawing ${withdrawAmount} mUSDY from vault...`);
 
     try {
@@ -458,12 +475,15 @@ function App(): ReactElement {
       const amount = ethers.parseUnits(withdrawAmount, 18);
 
       const tx = await vault.withdraw(amount, walletAddress, walletAddress);
+      setTxStatus('Confirming withdrawal on blockchain...');
       await tx.wait();
 
       setActionSuccess(`✅ Withdrew ${withdrawAmount} mUSDY from vault!`);
+      setTxStatus(null);
       await refreshData(walletAddress, provider);
     } catch (e: any) {
       setActionError(e.message || 'Withdrawal failed');
+      setTxStatus(null);
     }
 
     setProcessing(false);
@@ -737,6 +757,21 @@ function App(): ReactElement {
                       off-chain SessionCredential that can be submitted
                       on-chain.
                     </div>
+                    {processing && proofStatus && (
+                      <div className="rounded-xl border border-mantle-primary/30 bg-mantle-primary/10 p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-mantle-primary/20 border-t-mantle-primary" />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-white">
+                              {proofStatus}
+                            </div>
+                            <div className="mt-1 text-xs text-mantle-muted">
+                              🔒 Encrypted connection to secure server
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <button
                       onClick={generateProof}
                       disabled={processing}

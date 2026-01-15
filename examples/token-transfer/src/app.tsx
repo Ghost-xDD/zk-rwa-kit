@@ -184,6 +184,7 @@ function App(): ReactElement {
   const [transferAmount, setTransferAmount] = useState('100');
   const [transferError, setTransferError] = useState<string | null>(null);
   const [transferSuccess, setTransferSuccess] = useState<string | null>(null);
+  const [txStatus, setTxStatus] = useState<string | null>(null);
 
   React.useEffect(() => {
     const addLogMessage = (message: string) => {
@@ -445,6 +446,7 @@ function App(): ReactElement {
     setProcessing(true);
     setTransferError(null);
     setTransferSuccess(null);
+    setTxStatus('Requesting mint from relayer...');
     console.log('🪙 Requesting mUSDY mint...');
 
     try {
@@ -454,17 +456,20 @@ function App(): ReactElement {
         body: JSON.stringify({ recipient: walletAddress, amount: '1000' }),
       });
 
+      setTxStatus('Processing mint transaction...');
       const data = await response.json();
 
       if (data.success) {
         setTransferSuccess(`Successfully minted 1000 mUSDY!`);
         console.log(`Mint successful: ${data.txHash}`);
+        setTxStatus(null);
         setTimeout(() => refreshTokenData(walletAddress, provider!), 5000);
       } else {
         throw new Error(data.error || 'Mint failed');
       }
     } catch (e: any) {
       setTransferError(`Mint failed: ${e.message}`);
+      setTxStatus(null);
     }
 
     setProcessing(false);
@@ -476,6 +481,7 @@ function App(): ReactElement {
     setProcessing(true);
     setTransferError(null);
     setTransferSuccess(null);
+    setTxStatus('Initiating token transfer...');
     console.log(`Transferring ${transferAmount} mUSDY...`);
 
     try {
@@ -483,14 +489,18 @@ function App(): ReactElement {
       const mUSDY = new ethers.Contract(MUSDY_ADDRESS, MUSDY_ABI, signer);
       const amount = ethers.parseUnits(transferAmount, 18);
 
+      setTxStatus('Sending transaction to blockchain...');
       const tx = await mUSDY.transfer(transferRecipient, amount);
       console.log(`Transaction sent: ${tx.hash}`);
+      
+      setTxStatus('Confirming transfer on blockchain...');
       const receipt = await tx.wait();
 
       if (receipt.status === 1) {
         setTransferSuccess(`Successfully transferred ${transferAmount} mUSDY!`);
         console.log(`Transfer successful: ${tx.hash}`);
         setShowConfetti(true);
+        setTxStatus(null);
         await refreshTokenData(walletAddress, provider);
       }
     } catch (e: any) {
@@ -501,6 +511,7 @@ function App(): ReactElement {
         console.log('COMPLIANCE CHECK FAILED');
       }
       setTransferError(errorMessage);
+      setTxStatus(null);
     }
 
     setProcessing(false);
@@ -1010,6 +1021,40 @@ function App(): ReactElement {
                         </p>
                       </div>
                     </div>
+                    
+                    {processing && txStatus && step === 'tokens' && (
+                      <div className="mb-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                        <div className="flex items-center gap-3">
+                          <div className="w-5 h-5">
+                            <svg
+                              className="w-5 h-5 animate-spin text-amber-400"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-amber-400">
+                              {txStatus}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <button
                       onClick={requestMint}
                       disabled={processing || !isVerifiedOnChain}
@@ -1106,6 +1151,42 @@ function App(): ReactElement {
                           </span>
                         </div>
                       </div>
+
+                      {processing && txStatus && (
+                        <div className="p-4 rounded-xl bg-mantle-primary/10 border border-mantle-primary/30">
+                          <div className="flex items-center gap-3">
+                            <div className="w-5 h-5">
+                              <svg
+                                className="w-5 h-5 animate-spin text-mantle-primary"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="3"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-white">
+                                {txStatus}
+                              </p>
+                              <p className="text-xs text-mantle-muted mt-1">
+                                Please wait for confirmation...
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       <button
                         onClick={transferTokens}
