@@ -166,7 +166,10 @@ function App(): ReactElement {
   }, []);
 
   const refreshData = useCallback(
-    async (address: string, ethProvider: ethers.BrowserProvider) => {
+    async (
+      address: string,
+      ethProvider: ethers.BrowserProvider
+    ): Promise<{ verified: boolean; eligible: boolean }> => {
       try {
         const mUSDY = new ethers.Contract(
           MUSDY_ADDRESS,
@@ -205,8 +208,11 @@ function App(): ReactElement {
         console.log(`🏦 Vault shares: ${ethers.formatUnits(shares, 18)} mYV`);
         console.log(`📊 Vault TVL: ${ethers.formatUnits(tvl, decimals)} mUSDY`);
         console.log(`✅ Eligible for vault: ${eligible}`);
+
+        return { verified, eligible };
       } catch (err) {
         console.log('⚠️ Could not fetch data');
+        return { verified: false, eligible: false };
       }
     },
     []
@@ -226,7 +232,6 @@ function App(): ReactElement {
 
       setWalletAddress(address);
       setProvider(ethProvider);
-      setStep('prove');
       console.log(
         `✅ Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`
       );
@@ -253,7 +258,15 @@ function App(): ReactElement {
         }
       }
 
-      await refreshData(address, ethProvider);
+      const { verified, eligible } = await refreshData(address, ethProvider);
+
+      // Skip to vault if user already has a valid SessionCredential
+      if (verified && eligible) {
+        console.log('🎉 Existing SessionCredential found, skipping to vault');
+        setStep('vault');
+      } else {
+        setStep('prove');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to connect');
     }
@@ -1002,7 +1015,7 @@ function App(): ReactElement {
                     )}
                   >
                     {step === 'prove' && processing
-                      ? 'Verifying…'
+                      ? 'Generating...'
                       : step === 'submit' && processing
                         ? 'Submitting…'
                         : isVerifiedOnChain
@@ -1015,6 +1028,21 @@ function App(): ReactElement {
                   SessionCredentials so protocols can remain composable while
                   enforcing access control.
                 </div>
+                {txHash && isVerifiedOnChain && (
+                  <div className="mt-4 rounded-xl border border-mantle-border bg-mantle-dark/40 p-4">
+                    <div className="text-xs text-mantle-muted">
+                      SessionCredential TX
+                    </div>
+                    <a
+                      href={`${chainExplorerUrl}/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 block break-all font-mono text-xs text-mantle-primary hover:brightness-110"
+                    >
+                      {txHash}
+                    </a>
+                  </div>
+                )}
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-xl border border-mantle-border bg-mantle-dark/40 p-4">
                     <div className="text-xs text-mantle-muted">
@@ -1022,7 +1050,7 @@ function App(): ReactElement {
                     </div>
                     <div className="mt-2 text-sm font-semibold">
                       {step === 'prove' && processing ? (
-                        <span className="text-amber-300">Verifying…</span>
+                        <span className="text-amber-300">Generating...</span>
                       ) : step === 'submit' && processing ? (
                         <span className="text-amber-300">Submitting…</span>
                       ) : vaultEligible ? (
